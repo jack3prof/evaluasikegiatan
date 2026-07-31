@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluasi Kegiatan Hari Ini</title>
+
+    <style>
+        /* =========================
+           RESET & BASIC
+        ========================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Roboto, Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: #1565c0;
+            color: white;
+            padding: 16px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+        }
+
+        /* =========================
+           CONTAINER & CARD
+        ========================= */
+        .container {
+            max-width: 700px;
+            margin: auto;
+            padding: 12px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .08);
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #1565c0;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 6px;
+        }
+
+        .section-header {
+            font-weight: bold;
+            font-size: 15px;
+            color: #0f172a;
+            margin: 16px 0 10px 0;
+            padding-bottom: 4px;
+            border-bottom: 1px dashed #cbd5e1;
+        }
+
+        .section-desc {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        /* =========================
+           FORM ELEMENTS
+        ========================= */
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        .sub-label {
+            display: block;
+            font-size: 12px;
+            color: #64748b;
+            margin-top: -3px;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            margin-bottom: 14px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            border-color: #1565c0;
+            box-shadow: 0 0 0 2px rgba(21, 101, 192, .15);
+        }
+
+        input.error {
+            border-color: red;
+        }
+
+        /* =========================
+           PERTANYAAN EVALUASI & SKALA
+        ========================= */
+        .q-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .q-text {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #334155;
+        }
+
+        .rating-group {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+
+        .rating-btn {
+            position: relative;
+        }
+
+        .rating-btn input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .rating-label {
+            display: block;
+            text-align: center;
+            padding: 8px 4px;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 0;
+        }
+
+        .rating-btn input[type="radio"]:checked + .rating-label {
+            background: #1565c0;
+            border-color: #1565c0;
+            color: white;
+        }
+
+        /* =========================
+           BUTTON & TABLES
+        ========================= */
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: #1565c0;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:disabled {
+            background: #94a3b8;
+        }
+
+        .search {
+            margin-bottom: 10px;
+        }
+
+        .table-wrap {
+            overflow: auto;
+            max-height: 400px;
+            border-radius: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        th {
+            background: #1565c0;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .score-badge {
+            font-weight: bold;
+            color: #1565c0;
+        }
+
+        /* =========================
+           LOADING & SNACKBAR
+        ========================= */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 4px solid #ddd;
+            border-top-color: #1565c0;
+            animation: spin 1s linear infinite;
+            margin: auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .snackbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 20px;
+            display: none;
+            z-index: 100;
+            font-size: 14px;
+        }
+
+        /* Dark Mode */
+        @media(prefers-color-scheme:dark) {
+            body { background: #0f172a; color: white; }
+            .card { background: #1e293b; }
+            .card-title { color: #60a5fa; border-color: #334155; }
+            .section-header { color: #93c5fd; border-color: #334155; }
+            input[type="text"], textarea { background: #334155; color: white; border-color: #475569; }
+            label { color: #cbd5e1; }
+            .q-item { background: #0f172a; border-color: #334155; }
+            .q-text { color: #e2e8f0; }
+            .rating-label { background: #334155; border-color: #475569; color: white; }
+            .rating-btn input[type="radio"]:checked + .rating-label { background: #2563eb; border-color: #60a5fa; }
+            td { color: white; }
+            tr:nth-child(even) { background: #334155; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        Evaluasi Kegiatan
+    </div>
+
+    <div class="container">
+
+        <!-- FORM EVALUASI -->
+        <div class="card">
+            <label for="pengguna">Pengisi - ID_Sektor ID_Kelas ID_Anggota</label>
+            <span class="sub-label">Contoh: RW IA401 WAC01</span>
+            <input id="pengguna" type="text" placeholder="Contoh: RW IA401 WAC01" autocomplete="off">
+
+            <div id="evaluasiList">
+                <!-- Generator Pertanyaan via Script -->
+            </div>
+
+            <!-- F. Usul dan Saran -->
+            <div class="section-header">F. Usul dan Saran</div>
+            <div class="q-item">
+                <div class="q-text">Berikan usul dan saran Anda untuk perbaikan kegiatan mendatang:</div>
+                <textarea id="saranText" rows="3" placeholder="Tuliskan usul dan saran di sini..."></textarea>
+            </div>
+
+            <button id="btnSimpan" onclick="simpan()">Simpan Evaluasi</button>
+        </div>
+
+        <!-- TABEL RATA-RATA EVALUASI -->
+        <div class="card">
+            <div class="card-title">Rata-Rata Capaian Evaluasi (Skala 1 - 5)</div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Indikator Evaluasi</th>
+                            <th>Rata-Rata Skor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelRataRata">
+                        <!-- Data Rata-Rata -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TABEL DAFTAR PENGISI -->
+        <div class="card">
+            <div class="card-title">Daftar Pengisi Evaluasi</div>
+            <input class="search" id="cari" type="text" placeholder="🔍 Cari pengisi..." oninput="filterData()">
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Memuat data...</p>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr id="headerTabelPengisi">
+                            <th>Pengisi</th>
+                            <th>Rata-Rata Total</th>
+                            <th>Usul & Saran</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelData"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SNACKBAR -->
+    <div class="snackbar" id="snackbar"></div>
+
+    <script>
+        const API = "https://script.google.com/macros/s/AKfycbz2ZK1EiHwiPzOki1OHDfsoVcKiKPDLpwbNjMmefNqTRFxFgJBNovlolG7IrwxDwkRTvA/exec";
+
+        // Pertanyaan Evaluasi: 2 indikator per kategori (B2 diperbarui)
+        const DRAFT_EVALUASI = [
+            {
+                kategori: "A. Evaluasi Materi",
+                subtext: "Penilaian terhadap kualitas dan kegunaan materi",
+                items: [
+                    { id: "A1", tableLabel: "Relevan Kebutuhan", text: "Materi relevan dengan kebutuhan peserta." },
+                    { id: "A2", tableLabel: "Dapat Diterapkan", text: "Materi dapat diterapkan dalam tugas / kegiatan sehari-hari." }
+                ]
+            },
+            {
+                kategori: "B. Evaluasi Narasumber",
+                subtext: "Penilaian terhadap kompetensi narasumber",
+                items: [
+                    { id: "B1", tableLabel: "Penguasaan Materi", text: "Narasumber menguasai materi dengan baik." },
+                    { id: "B2", tableLabel: "Memberi Inspirasi", text: "Narasumber mampu memberi inspirasi." }
+                ]
+            },
+            {
+                kategori: "C. Evaluasi Suasana Acara",
+                subtext: "Penilaian terhadap dinamika dan pelaksanaan kegiatan",
+                items: [
+                    { id: "C1", tableLabel: "Tertib & Kondusif", text: "Acara berlangsung tertib, kondusif, dan lancar." },
+                    { id: "C2", tableLabel: "Pencapaian Tujuan", text: "Suasana acara mendukung tercapainya tujuan kegiatan." }
+                ]
+            },
+            {
+                kategori: "D. Evaluasi Kepanitiaan",
+                subtext: "Penilaian terhadap kesiapan dan pelayanan panitia",
+                items: [
+                    { id: "D1", tableLabel: "Pelayanan Panitia", text: "Panitia memberikan pelayanan dan bantuan dengan baik." },
+                    { id: "D2", tableLabel: "Kejelasan Informasi", text: "Informasi dan arahan dari panitia disampaikan dengan jelas." }
+                ]
+            },
+            {
+                kategori: "E. Evaluasi Tempat & Fasilitas",
+                subtext: "Penilaian terhadap sarana pendukung",
+                items: [
+                    { id: "E1", tableLabel: "Kenyamanan Ruangan", text: "Ruangan kegiatan bersih, nyaman, dan memadai." },
+                    { id: "E2", tableLabel: "Kelayakan Fasilitas", text: "Fasilitas (AC, Audio, LCD, dll.) berfungsi dengan baik." }
+                ]
+            }
+        ];
+
+        // Flat array seluruh pertanyaan A-E
+        const FLAT_PERTANYAAN = DRAFT_EVALUASI.flatMap(group => group.items);
+
+        let semuaData = [];
+
+        document.addEventListener("DOMContentLoaded", function () {
+            renderFormEvaluasi();
+            loadData();
+
+            const inputPengguna = document.getElementById("pengguna");
+            inputPengguna.addEventListener("input", function () {
+                this.value = this.value.toUpperCase();
+            });
+            inputPengguna.addEventListener("blur", function () {
+                this.value = bersihkanPengguna(this.value);
+            });
+        });
+
+        // =========================
+        // RENDER FORM EVALUASI
+        // =========================
+        function renderFormEvaluasi() {
+            const container = document.getElementById("evaluasiList");
+            let html = "";
+
+            DRAFT_EVALUASI.forEach((kat) => {
+                html += `<div class="section-header">${aman(kat.kategori)}</div>`;
+                html += `<div class="section-desc">${aman(kat.subtext)}</div>`;
+
+                kat.items.forEach((q) => {
+                    const name = `eval_${q.id}`;
+                    html += `
+                    <div class="q-item">
+                        <div class="q-text">${q.id}. ${aman(q.text)}</div>
+                        <div class="rating-group">
+                            <div class="rating-btn">
+                                <input type="radio" id="${q.id}_1" name="${name}" value="1">
+                                <label class="rating-label" for="${q.id}_1">1<br><small style="font-size:9px">S.Kurang</small></label>
+                            </div>
+                            <div class="rating-btn">
+                                <input type="radio" id="${q.id}_2" name="${name}" value="2">
+                                <label class="rating-label" for="${q.id}_2">2<br><small style="font-size:9px">Kurang</small></label>
+                            </div>
+                            <div class="rating-btn">
+                                <input type="radio" id="${q.id}_3" name="${name}" value="3">
+                                <label class="rating-label" for="${q.id}_3">3<br><small style="font-size:9px">Cukup</small></label>
+                            </div>
+                            <div class="rating-btn">
+                                <input type="radio" id="${q.id}_4" name="${name}" value="4" checked>
+                                <label class="rating-label" for="${q.id}_4">4<br><small style="font-size:9px">Baik</small></label>
+                            </div>
+                            <div class="rating-btn">
+                                <input type="radio" id="${q.id}_5" name="${name}" value="5">
+                                <label class="rating-label" for="${q.id}_5">5<br><small style="font-size:9px">S.Baik</small></label>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+            });
+
+            container.innerHTML = html;
+        }
+
+        function bersihkanPengguna(inputRaw) {
+            let bersih = inputRaw.replace(/\s+/g, "").toUpperCase();
+            let regexPola = /^([A-Z]{2})([A-Z]{2}[0-9]{3})([A-Z]{3}[0-9]{2})$/;
+            let match = bersih.match(regexPola);
+
+            if (match) {
+                return `${match[1]} ${match[2]} ${match[3]}`;
+            }
+            return inputRaw.toUpperCase();
+        }
+
+        // =========================
+        // LOAD DATA DARI SERVER
+        // =========================
+        async function loadData() {
+            tampilLoading(true);
+            try {
+                const response = await fetch(API + "?action=list");
+                semuaData = await response.json();
+                tampilTabelRataRata(semuaData);
+                tampilTabel(semuaData);
+            } catch (e) {
+                snackbar("Gagal mengambil data");
+                console.error(e);
+            }
+            tampilLoading(false);
+        }
+
+        // =========================
+        // TAMPIL TABEL RATA-RATA
+        // =========================
+        function tampilTabelRataRata(data) {
+            let html = "";
+
+            if (!Array.isArray(data) || data.length === 0) {
+                html = `<tr><td colspan="3" style="text-align:center">Belum ada data evaluasi</td></tr>`;
+            } else {
+                let totalPengisi = data.length;
+
+                FLAT_PERTANYAAN.forEach((q, idx) => {
+                    let totalSkor = 0;
+
+                    data.forEach(r => {
+                        let nilai = 0;
+                        if (r.jawaban && Array.isArray(r.jawaban)) {
+                            nilai = parseFloat(r.jawaban[idx]) || 0;
+                        } else if (r[q.id]) {
+                            nilai = parseFloat(r[q.id]) || 0;
+                        } else if (r[`q${idx + 1}`]) {
+                            nilai = parseFloat(r[`q${idx + 1}`]) || 0;
+                        }
+                        totalSkor += nilai;
+                    });
+
+                    let rataRata = (totalSkor / totalPengisi).toFixed(2);
+
+                    html += `
+                    <tr>
+                        <td><strong>${q.id}</strong></td>
+                        <td>${aman(q.tableLabel)}</td>
+                        <td class="score-badge">⭐ ${rataRata} / 5.00</td>
+                    </tr>`;
+                });
+            }
+
+            document.getElementById("tabelRataRata").innerHTML = html;
+        }
+
+        // =========================
+        // TAMPIL TABEL PENGISI
+        // =========================
+        function tampilTabel(data) {
+            let html = "";
+
+            if (!Array.isArray(data) || data.length === 0) {
+                html = `<tr><td colspan="3" style="text-align:center">Tidak ada data</td></tr>`;
+            } else {
+                data.forEach(function (r) {
+                    let totalSkor = 0;
+                    let count = 0;
+
+                    FLAT_PERTANYAAN.forEach((q, idx) => {
+                        let val = 0;
+                        if (r.jawaban && Array.isArray(r.jawaban)) {
+                            val = parseFloat(r.jawaban[idx]) || 0;
+                        } else if (r[q.id]) {
+                            val = parseFloat(r[q.id]) || 0;
+                        } else if (r[`q${idx + 1}`]) {
+                            val = parseFloat(r[`q${idx + 1}`]) || 0;
+                        }
+                        if (val > 0) {
+                            totalSkor += val;
+                            count++;
+                        }
+                    });
+
+                    let avgUser = count > 0 ? (totalSkor / count).toFixed(2) : "-";
+                    let saran = r.saran || r.jawabanSaran || "-";
+
+                    html += `
+                    <tr>
+                        <td><strong>${aman(r.pengguna)}</strong></td>
+                        <td class="score-badge">⭐ ${avgUser}</td>
+                        <td>${aman(saran)}</td>
+                    </tr>`;
+                });
+            }
+
+            document.getElementById("tabelData").innerHTML = html;
+        }
+
+        function filterData() {
+            let keyword = document.getElementById("cari").value.toLowerCase();
+            let hasil = semuaData.filter(function (r) {
+                let pengisi = (r.pengguna || "").toLowerCase();
+                return pengisi.includes(keyword);
+            });
+            tampilTabel(hasil);
+        }
+
+        // =========================
+        // SIMPAN DATA
+        // =========================
+        async function simpan() {
+            let inputEl = document.getElementById("pengguna");
+            let pengguna = bersihkanPengguna(inputEl.value);
+            inputEl.value = pengguna;
+
+            let regexBaku = /^[A-Z]{2}\s[A-Z]{2}[0-9]{3}\s[A-Z]{3}[0-9]{2}$/;
+
+            if (!regexBaku.test(pengguna)) {
+                errorInput("pengguna", "Format pengisi salah! Contoh: RW IA401 WAC01");
+                return;
+            }
+
+            let jawabanEvaluasi = [];
+            FLAT_PERTANYAAN.forEach((q) => {
+                let checkedEl = document.querySelector(`input[name="eval_${q.id}"]:checked`);
+                jawabanEvaluasi.push(checkedEl ? checkedEl.value : "3");
+            });
+
+            let saranText = document.getElementById("saranText").value.trim();
+
+            let tombol = document.getElementById("btnSimpan");
+            tombol.disabled = true;
+            tombol.innerHTML = "Menyimpan...";
+
+            try {
+                const params = new URLSearchParams({
+                    action: "simpan",
+                    pengguna: pengguna,
+                    jawaban: JSON.stringify(jawabanEvaluasi),
+                    saran: saranText
+                });
+
+                let response = await fetch(`${API}?${params.toString()}`);
+                let hasil = await response.json();
+
+                if (hasil.success) {
+                    snackbar("Evaluasi berhasil disimpan!");
+                    document.getElementById("pengguna").value = "";
+                    document.getElementById("saranText").value = "";
+                    renderFormEvaluasi();
+                    loadData();
+                } else {
+                    snackbar(hasil.message || "Gagal menyimpan data");
+                }
+
+            } catch (e) {
+                snackbar("Server tidak merespon");
+                console.error(e);
+            }
+
+            tombol.disabled = false;
+            tombol.innerHTML = "Simpan Evaluasi";
+        }
+
+        function tampilLoading(status) {
+            document.getElementById("loading").style.display = status ? "block" : "none";
+        }
+
+        function snackbar(text) {
+            let s = document.getElementById("snackbar");
+            s.innerHTML = text;
+            s.style.display = "block";
+            setTimeout(function () {
+                s.style.display = "none";
+            }, 2500);
+        }
+
+        function errorInput(id, msg) {
+            let el = document.getElementById(id);
+            el.classList.add("error");
+            snackbar(msg);
+            setTimeout(function () {
+                el.classList.remove("error");
+            }, 2000);
+        }
+
+        function aman(text) {
+            if (!text) return "";
+            return text.toString()
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+        }
+    </script>
+</body>
+
+</html>
