@@ -82,6 +82,65 @@
         }
 
         /* =========================
+           STATISTIK CARDS
+        ========================= */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .stat-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1565c0;
+            margin-top: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        /* =========================
+           RINGKASAN SARAN LIST
+        ========================= */
+        .saran-list {
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .saran-item {
+            background: #f8fafc;
+            border-left: 4px solid #1565c0;
+            padding: 10px 12px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .saran-user {
+            font-weight: bold;
+            color: #334155;
+            margin-bottom: 2px;
+        }
+
+        .saran-text {
+            color: #475569;
+            font-style: italic;
+        }
+
+        /* =========================
            FORM ELEMENTS
         ========================= */
         label {
@@ -284,8 +343,9 @@
             .section-header { color: #93c5fd; border-color: #334155; }
             input[type="text"], textarea { background: #334155; color: white; border-color: #475569; }
             label { color: #cbd5e1; }
-            .q-item { background: #0f172a; border-color: #334155; }
-            .q-text { color: #e2e8f0; }
+            .q-item, .stat-box, .saran-item { background: #0f172a; border-color: #334155; }
+            .q-text, .saran-user { color: #e2e8f0; }
+            .saran-text { color: #94a3b8; }
             .rating-label { background: #334155; border-color: #475569; color: white; }
             .rating-btn input[type="radio"]:checked + .rating-label { background: #2563eb; border-color: #60a5fa; }
             td { color: white; }
@@ -322,6 +382,25 @@
             <button id="btnSimpan" onclick="simpan()">Simpan Evaluasi</button>
         </div>
 
+        <!-- STATISTIK PENGISI -->
+        <div class="card">
+            <div class="card-title">Ringkasan Peserta Pengisi</div>
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Total Pengisi</div>
+                    <div class="stat-number" id="statTotal">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Ikhwan</div>
+                    <div class="stat-number" id="statIkhwan">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Akhwat</div>
+                    <div class="stat-number" id="statAkhwat">0</div>
+                </div>
+            </div>
+        </div>
+
         <!-- TABEL RATA-RATA EVALUASI -->
         <div class="card">
             <div class="card-title">Rata-Rata Capaian Evaluasi (Skala 1 - 5)</div>
@@ -341,10 +420,18 @@
             </div>
         </div>
 
+        <!-- RINGKASAN USUL & SARAN -->
+        <div class="card">
+            <div class="card-title">Ringkasan Usul & Saran</div>
+            <div class="saran-list" id="saranContainer">
+                <!-- Daftar Usul & Saran -->
+            </div>
+        </div>
+
         <!-- TABEL DAFTAR PENGISI -->
         <div class="card">
             <div class="card-title">Daftar Pengisi Evaluasi</div>
-            <input class="search" id="cari" type="text" placeholder="🔍 Cari pengisi..." oninput="filterData()">
+            <input class="search" id="cari" type="text" placeholder="🔍 Cari pengisi, usul, atau saran..." oninput="filterData()">
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
@@ -499,13 +586,50 @@
             try {
                 const response = await fetch(API + "?action=list");
                 semuaData = await response.json();
+                tampilStatistik(semuaData);
                 tampilTabelRataRata(semuaData);
+                tampilRingkasanSaran(semuaData);
                 tampilTabel(semuaData);
             } catch (e) {
                 snackbar("Gagal mengambil data");
                 console.error(e);
             }
             tampilLoading(false);
+        }
+
+        // =========================
+        // TAMPIL STATISTIK IKHWAN/AKHWAT (DIBERSIHKAN SPASI)
+        // =========================
+        function tampilStatistik(data) {
+            if (!Array.isArray(data)) {
+                document.getElementById("statTotal").innerText = "0";
+                document.getElementById("statIkhwan").innerText = "0";
+                document.getElementById("statAkhwat").innerText = "0";
+                return;
+            }
+
+            let total = data.length;
+            let ikhwan = 0;
+            let akhwat = 0;
+
+            data.forEach(r => {
+                // Menghapus seluruh spasi terlebih dahulu (misal: "RW IA401 WAC01" -> "RWIA401WAC01")
+                let ID = (r.pengguna || "").replace(/\s+/g, "").toUpperCase();
+
+                // Kode Gender (I/A) ada pada karakter ke-3 (indeks 2)
+                if (ID.length >= 3) {
+                    let genderChar = ID.charAt(2); 
+                    if (genderChar === 'I') {
+                        ikhwan++;
+                    } else if (genderChar === 'A') {
+                        akhwat++;
+                    }
+                }
+            });
+
+            document.getElementById("statTotal").innerText = total;
+            document.getElementById("statIkhwan").innerText = ikhwan;
+            document.getElementById("statAkhwat").innerText = akhwat;
         }
 
         // =========================
@@ -546,6 +670,34 @@
             }
 
             document.getElementById("tabelRataRata").innerHTML = html;
+        }
+
+        // =========================
+        // TAMPIL RINGKASAN SARAN
+        // =========================
+        function tampilRingkasanSaran(data) {
+            let html = "";
+            let adaSaran = false;
+
+            if (Array.isArray(data) && data.length > 0) {
+                data.forEach(r => {
+                    let saran = (r.saran || r.jawabanSaran || "").trim();
+                    if (saran && saran !== "-") {
+                        adaSaran = true;
+                        html += `
+                        <div class="saran-item">
+                            <div class="saran-user">${aman(r.pengguna)}</div>
+                            <div class="saran-text">"${aman(saran)}"</div>
+                        </div>`;
+                    }
+                });
+            }
+
+            if (!adaSaran) {
+                html = `<div style="text-align:center; color:#64748b; font-size:13px; padding:10px;">Belum ada usul & saran.</div>`;
+            }
+
+            document.getElementById("saranContainer").innerHTML = html;
         }
 
         // =========================
@@ -591,11 +743,17 @@
             document.getElementById("tabelData").innerHTML = html;
         }
 
+        // =========================
+        // FILTER DATA (Pengisi & Saran)
+        // =========================
         function filterData() {
             let keyword = document.getElementById("cari").value.toLowerCase();
             let hasil = semuaData.filter(function (r) {
                 let pengisi = (r.pengguna || "").toLowerCase();
-                return pengisi.includes(keyword);
+                let saran = (r.saran || r.jawabanSaran || "").toLowerCase();
+                
+                // Mencakup nama pengisi DAN isi usul/saran
+                return pengisi.includes(keyword) || saran.includes(keyword);
             });
             tampilTabel(hasil);
         }
