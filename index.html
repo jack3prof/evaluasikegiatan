@@ -514,11 +514,22 @@
             loadData();
 
             const inputPengguna = document.getElementById("pengguna");
+
+            // 1. Muat ID Pengisi dari LocalStorage jika ada
+            const savedPengguna = localStorage.getItem("evaluasi_pengguna");
+            if (savedPengguna) {
+                inputPengguna.value = savedPengguna;
+            }
+
             inputPengguna.addEventListener("input", function () {
                 this.value = this.value.toUpperCase();
+                // Simpan ID secara realtime ke LocalStorage
+                localStorage.setItem("evaluasi_pengguna", this.value);
             });
+
             inputPengguna.addEventListener("blur", function () {
                 this.value = bersihkanPengguna(this.value);
+                localStorage.setItem("evaluasi_pengguna", this.value);
             });
         });
 
@@ -613,10 +624,8 @@
             let akhwat = 0;
 
             data.forEach(r => {
-                // Menghapus seluruh spasi terlebih dahulu (misal: "RW IA401 WAC01" -> "RWIA401WAC01")
                 let ID = (r.pengguna || "").replace(/\s+/g, "").toUpperCase();
 
-                // Kode Gender (I/A) ada pada karakter ke-3 (indeks 2)
                 if (ID.length >= 3) {
                     let genderChar = ID.charAt(2); 
                     if (genderChar === 'I') {
@@ -752,7 +761,6 @@
                 let pengisi = (r.pengguna || "").toLowerCase();
                 let saran = (r.saran || r.jawabanSaran || "").toLowerCase();
                 
-                // Mencakup nama pengisi DAN isi usul/saran
                 return pengisi.includes(keyword) || saran.includes(keyword);
             });
             tampilTabel(hasil);
@@ -781,6 +789,22 @@
 
             let saranText = document.getElementById("saranText").value.trim();
 
+            // ==========================================
+            // PENCEGAHAN DUPLIKASI DATA (HUMAN ERROR)
+            // ==========================================
+            const isianHash = JSON.stringify({
+                pengguna: pengguna,
+                jawaban: jawabanEvaluasi,
+                saran: saranText
+            });
+
+            let riwayatIsian = JSON.parse(localStorage.getItem("evaluasi_riwayat") || "[]");
+
+            if (riwayatIsian.includes(isianHash)) {
+                snackbar("⚠️ Anda sudah pernah mengirimkan data ini!");
+                return;
+            }
+
             let tombol = document.getElementById("btnSimpan");
             tombol.disabled = true;
             tombol.innerHTML = "Menyimpan...";
@@ -798,7 +822,13 @@
 
                 if (hasil.success) {
                     snackbar("Evaluasi berhasil disimpan!");
-                    document.getElementById("pengguna").value = "";
+
+                    // Simpan ID pengguna & riwayat submit ke LocalStorage
+                    localStorage.setItem("evaluasi_pengguna", pengguna);
+                    riwayatIsian.push(isianHash);
+                    localStorage.setItem("evaluasi_riwayat", JSON.stringify(riwayatIsian));
+
+                    // Reset textarea saran saja (ID Pengisi tetap ada)
                     document.getElementById("saranText").value = "";
                     renderFormEvaluasi();
                     loadData();
