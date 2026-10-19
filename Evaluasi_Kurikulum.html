@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluasi Sosialisasi dan Pendalaman Kurikulum Pendidikan 1447</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f5f9;
+  margin: 0;
+  padding: 16px;
+  color: #243047;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+header, .panel {
+  background: white;
+  padding: 22px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  box-shadow: 0 2px 9px #0000000d;
+}
+
+header {
+  background: #173b65;
+  color: white;
+}
+
+h1 {
+  font-size: 25px;
+  margin: 0 0 10px;
+}
+
+h2 {
+  font-size: 19px;
+  margin-top: 0;
+}
+
+.desc {
+  line-height: 1.6;
+}
+
+.question {
+<---  border-bottom: 1px solid #e5e9ef; --->
+  padding: 16px 0;
+}
+
+.question:last-child {
+  border-bottom: 0;
+}
+
+.question-title {
+  font-weight: bold;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px;
+  margin: 6px 0;
+  background: #f7f9fc;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.option:hover {
+  background: #edf3fa;
+}
+
+.option input {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.option-text {
+  flex: 1;
+  line-height: 1.45;
+}
+
+.count {
+  margin-left: auto;
+  color: #174d7d;
+  font-size: 13px;
+  font-weight: bold;
+  white-space: nowrap;
+  text-align: right;
+  min-width: 145px;
+}
+
+input[type="text"], textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font: inherit;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+button {
+  background: #1765a5;
+  color: white;
+  border: 0;
+  padding: 13px 18px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.secondary {
+  background: #52657d;
+}
+
+.status {
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+  gap: 10px;
+}
+
+.stat {
+  background: #eef4fb;
+  padding: 12px;
+  border-radius: 9px;
+}
+
+.stat strong {
+  display: block;
+  font-size: 22px;
+  color: #174d7d;
+  margin-top: 5px;
+}
+
+.respondent-list {
+  padding-left: 22px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.small {
+  font-size: 13px;
+  color: #617086;
+  line-height: 1.5;
+}
+
+.required {
+  color: #c62828;
+}
+
+.error {
+  color: #b42318;
+}
+
+.success {
+  color: #147d43;
+}
+
+/* Style untuk Bar / Tombol Pembuka Form */
+#formToggleBar {
+  background: #1765a5;
+  color: white;
+  padding: 16px 20px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: background 0.2s;
+}
+
+#formToggleBar:hover {
+  background: #125184;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 9px;
+  }
+
+  header, .panel {
+    padding: 16px;
+  }
+
+  h1 {
+    font-size: 21px;
+  }
+
+  .option {
+    flex-wrap: wrap;
+  }
+
+  .count {
+    margin-left: 27px;
+    min-width: 0;
+    width: 100%;
+    text-align: left;
+    font-size: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+  <h1>Evaluasi Sosialisasi dan Pendalaman Kurikulum Pendidikan 1447</h1>
+  <div class="desc">
+    
+  </div>
+</header>
+
+<section class="panel">
+  <h2>Rekapitulasi Responden</h2>
+
+  <p>Total responden: <strong id="total">0</strong></p>
+
+  <div id="prefixStats" class="stats"></div>
+
+  <p class="small" id="refreshInfo">
+    Memuat data ...
+  </p>
+
+  <button type="button" class="secondary" onclick="loadSummary()">
+    Muat ulang rekap
+  </button>
+</section>
+
+<!-- Bar / Tombol Interaktif untuk Membuka Form -->
+<div id="formToggleBar" onclick="openForm()">
+  Klik di sini untuk mulai mengisi formulir evaluasi
+</div>
+
+<form id="surveyForm" class="panel" style="display: none;">
+  <h2></h2>
+
+  <label for="respondentId">
+    <strong>ID Responden <span class="required">*</span></strong>
+  </label>
+
+  <input
+    id="respondentId"
+    name="respondentId"
+    type="text"
+    placeholder="Gunakan ID dengan format ABC DE123 FGH45"
+    required
+    maxlength="60"
+  >
+
+  <p class="small">
+    Gunakan ID dengan format ABC DE123 FGH45.<br> Jika ID sudah pernah mengisi, jawaban
+    sebelumnya akan diperbarui.
+  </p>
+
+  <h2 style="margin-top:25px"></h2>
+
+  <p class="small">
+    Angka di sebelah kanan setiap jawaban menunjukkan jumlah pemilih jawaban tersebut.<br>
+    Persentase diambil dari jumlah pemilih jawaban / seluruh responden yang tercatat.
+  </p>
+
+  <div id="questions"></div>
+
+  <div class="question">
+    <div class="question-title">11. Usulan dan Saran</div>
+
+    <label for="suggestions">
+      Tuliskan usulan atau saran untuk perbaikan kurikulum.
+    </label>
+
+    <textarea
+      id="suggestions"
+      name="suggestions"
+      placeholder="Tuliskan usulan dan saran Anda (opsional)"
+    ></textarea>
+  </div>
+
+  <button id="submitBtn" type="submit">Kirim Jawaban</button>
+
+  <div id="formStatus" class="status" role="status"></div>
+</form>
+
+<section class="panel">
+  <h2>Daftar Responden</h2>
+
+  <input
+    type="text"
+    id="searchRespondent"
+    placeholder="Cari berdasarkan ID responden..."
+    oninput="renderRespondents()"
+  >
+
+  <p class="small">
+  </p>
+
+  <div id="respondentList">Memuat daftar responden...</div>
+</section>
+
+</div>
+
+<script>
+/* =====================================================
+   KONFIGURASI WAJIB DIISI
+   ===================================================== */
+
+const SPREADSHEET_ID = "1RG80jYh7vkMx3I5MjdJ_4tYhlHREo1-5LiHh69ZZlx8";
+const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZzPyp1_EwLmtI4d9FrRb-FTVGTa2SJz2xD8t17EySJyvIIPQpVhAOHpEz6ADqNKhrow/exec";
+const SHEET_NAME = "Responses";
+
+/* =====================================================
+   FUNGSI MENAMPILKAN FORMULIR SAAT BAR DIKLIK
+   ===================================================== */
+
+function openForm() {
+  const bar = document.getElementById("formToggleBar");
+  const form = document.getElementById("surveyForm");
+  
+  // Sembunyikan bar dan tampilkan form
+  bar.style.display = "none";
+  form.style.display = "block";
+}
+
+/* =====================================================
+   DAFTAR PERTANYAAN
+   ===================================================== */
+
+const questions = [
+  {
+    title: "Apa yang paling diharapkan seorang naqib dalam proses pembinaan?",
+    options: [
+      "Ahdaf (sasaran) yang jelas",
+      "Modul pembinaan",
+      "Sarana atau fasilitas",
+      "Lingkungan yang mendukung"
+    ]
+  },
+  {
+    title: "Siapa yang paling berperan dalam keberhasilan tarbiyah?",
+    options: [
+      "Naqib",
+      "Anggota",
+      "Modul",
+      "Lingkungan"
+    ]
+  },
+  {
+    title: "Bagaimana tingkat kesulitan modul yang digunakan saat ini?",
+    options: [
+      "Sangat mudah",
+      "Mudah",
+      "Sulit",
+      "Sangat sulit"
+    ]
+  },
+  {
+    title: "Membangun tanpa cetak biru atau rancangan yang jelas mengakibatkan...",
+    options: [
+      "Pembangunan cepat selesai",
+      "Hasil selalu sesuai standar",
+      "Pembangunan lama selesai",
+      "Pembangunan lambat dan hasilnya tidak sesuai standar"
+    ]
+  },
+  {
+    title: "Jika lima orang membangun dengan kondisi yang sama tetapi tanpa rancangan yang jelas, bagaimana hasilnya?",
+    options: [
+      "Hasilnya akan sama",
+      "Ada beberapa hasil yang sama",
+      "Hasilnya tidak sama",
+      "Hasilnya sama dan pasti sesuai standar"
+    ]
+  },
+  {
+    title: "Apakah kurikulum baru ini akan membantu para pembina dalam menjalankan pembinaan di lapangan?",
+    options: [
+      "Sangat membantu dan menjadi panduan utama",
+      "Cukup membantu, tetapi masih perlu penyesuaian",
+      "Kurang membantu karena sulit diterapkan",
+      "Tidak membantu, lebih baik tanpa kurikulum"
+    ]
+  },
+  {
+    title: "Seberapa optimistis Anda bahwa kurikulum ini mempercepat pencapaian indikator?",
+    options: [
+      "Sangat optimistis",
+      "Optimistis, tetapi perlu pembuktian",
+      "Kurang optimistis karena ada kendala penerapan",
+      "Tidak optimistis karena tidak ada jaminan pencapaian"
+    ]
+  },
+  {
+    title: "Mana yang lebih penting dalam proses pembinaan: modul berkala atau penjelasan fokus ahdaf?",
+    options: [
+      "Modul sebagai panduan utama",
+      "Fokus pada ahdaf harus menjadi prioritas",
+      "Keduanya sama penting dan harus terintegrasi",
+      "Keduanya belum cukup tanpa pendampingan dan evaluasi"
+    ]
+  },
+  {
+    title: "Apakah rubrik penilaian membantu mengukur pencapaian indikator pembinaan?",
+    options: [
+      "Sangat membantu dan membuat penilaian lebih objektif",
+      "Cukup membantu, tetapi perlu disederhanakan",
+      "Kurang membantu karena kriterianya belum jelas",
+      "Tidak membantu, observasi langsung lebih efektif"
+    ]
+  },
+  {
+    title: "Apakah kurikulum yang mengintegrasikan indikator, modul, evaluasi, sarana, dan taqwim memudahkan pembinaan?",
+    options: [
+      "Sangat memudahkan",
+      "Memudahkan, tetapi beberapa komponen perlu diperbaiki",
+      "Tidak jauh berbeda dari sistem sebelumnya",
+      "Lebih menyulitkan karena menambah beban administrasi"
+    ]
+  }
+];
+
+let responses = [];
+let summaryLoaded = false;
+
+/* =====================================================
+   MEMBUAT TAMPILAN PERTANYAAN
+   ===================================================== */
+
+function renderQuestions() {
+  const root = document.getElementById("questions");
+  root.innerHTML = "";
+
+  questions.forEach((q, qi) => {
+    const section = document.createElement("div");
+    section.className = "question";
+
+    const title = document.createElement("div");
+    title.className = "question-title";
+    title.textContent = (qi + 1) + ". " + q.title;
+    section.appendChild(title);
+
+    q.options.forEach((option, oi) => {
+      const label = document.createElement("label");
+      label.className = "option";
+
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "q" + (qi + 1);
+      radio.value = option;
+      radio.required = true;
+
+      const optionText = document.createElement("span");
+      optionText.className = "option-text";
+      optionText.textContent = option;
+
+      const count = document.createElement("span");
+      count.className = "count";
+      count.id = "count-" + qi + "-" + oi;
+      count.textContent = "0 pemilih = 0,0%";
+
+      label.append(radio, optionText, count);
+      section.appendChild(label);
+    });
+
+    root.appendChild(section);
+  });
+}
+
+/* =====================================================
+   MEMUAT REKAP LANGSUNG DARI DATA
+   ===================================================== */
+
+function loadSummary() {
+  if (!SPREADSHEET_ID ||
+      SPREADSHEET_ID.startsWith("GANTI_")) {
+    document.getElementById("refreshInfo").textContent =
+      "";
+    return;
+  }
+
+  document.getElementById("refreshInfo").textContent =
+    "Memuat rekap ...";
+
+  const callbackName = "sheetCallback_" + Date.now();
+  const script = document.createElement("script");
+
+  const timeout = setTimeout(() => {
+    cleanup();
+    document.getElementById("refreshInfo").textContent =
+      "Gagal memuat data. Periksa ID spreadsheet, nama sheet, dan akses publik.";
+  }, 15000);
+
+  function cleanup() {
+    clearTimeout(timeout);
+
+    try {
+      delete window[callbackName];
+    } catch (e) {}
+
+    if (script.parentNode) {
+      script.parentNode.removeChild(script);
+    }
+  }
+
+  window[callbackName] = function(data) {
+    cleanup();
+
+    try {
+      if (!data || !data.table || !data.table.rows) {
+        throw new Error("Format data tidak valid");
+      }
+
+
+	  const rows = data.table.rows;
+
+      responses = rows.map(row => {
+        const cells = (row.c || []).map(cell =>
+          cell ? cell.v : ""
+        );
+
+        return {
+          id: String(cells[1] ?? "").trim(),
+          answers: cells.slice(2, 12).map(value =>
+            String(value ?? "")
+          ),
+          suggestions: String(cells[12] ?? "")
+        };
+      }).filter(response => {
+        // Abaikan jika ID kosong atau jika baris tersebut adalah teks header kolom
+        const upperId = response.id.toUpperCase();
+        return response.id !== "" && 
+               !upperId.includes("ID RESPONDEN") && 
+               !upperId.includes("TIMESTAMP");
+      });
+
+      summaryLoaded = true;
+
+      renderCounts();
+      renderPrefixStats();
+      renderRespondents();
+
+      document.getElementById("total").textContent =
+        responses.length;
+
+      document.getElementById("refreshInfo").textContent =
+        "Rekap terakhir dimuat: " +
+        new Date().toLocaleString("id-ID");
+
+    } catch (error) {
+      document.getElementById("refreshInfo").textContent =
+        "Data gagal dibaca. Pastikan kolom sheet Responses tidak diubah.";
+
+      console.error(error);
+    }
+  };
+
+  const url =
+    "https://docs.google.com/spreadsheets/d/" +
+    encodeURIComponent(SPREADSHEET_ID) +
+    "/gviz/tq?sheet=" +
+    encodeURIComponent(SHEET_NAME) +
+    "&tqx=out:json;responseHandler:" +
+    callbackName +
+    "&_=" + Date.now();
+
+  script.src = url;
+
+  script.onerror = function() {
+    cleanup();
+
+    document.getElementById("refreshInfo").textContent =
+      "Tidak dapat mengakses data.";
+  };
+
+  document.head.appendChild(script);
+}
+
+/* =====================================================
+   JUMLAH RESPONDEN DAN PERSENTASE SETIAP PILIHAN
+   ===================================================== */
+
+function renderCounts() {
+  const total = responses.length;
+
+  questions.forEach((q, qi) => {
+    q.options.forEach((option, oi) => {
+      const count = responses.filter(response =>
+        response.answers[qi] === option
+      ).length;
+
+      const percentage = total > 0
+        ? (count / total * 100).toLocaleString("id-ID", {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+          })
+        : "0,0";
+
+      const el = document.getElementById(
+        "count-" + qi + "-" + oi
+      );
+
+      if (el) {
+        el.textContent =
+          count + " responden · " + percentage + "%";
+      }
+    });
+  });
+}
+
+/* =====================================================
+   REKAP BERDASARKAN AWALAN ID RESPONDEN
+   ===================================================== */
+
+const prefixes = [
+  "DY1", "DY2", "JT1", "JT2", "JM1",
+  "JM2", "JM3", "BAL", "NTT", "NTB"
+];
+
+function renderPrefixStats() {
+  const root = document.getElementById("prefixStats");
+  root.innerHTML = "";
+
+  prefixes.forEach(prefix => {
+    const count = responses.filter(response =>
+      response.id.toUpperCase().startsWith(prefix)
+    ).length;
+
+    const box = document.createElement("div");
+    box.className = "stat";
+
+    const label = document.createElement("span");
+    label.textContent = prefix;
+
+    const number = document.createElement("strong");
+    number.textContent = count;
+
+    box.append(label, number);
+    root.appendChild(box);
+  });
+}
+
+/* =====================================================
+   DAFTAR RESPONDEN DAN PENCARIAN
+   ===================================================== */
+
+function renderRespondents() {
+  const root = document.getElementById("respondentList");
+
+  const search = document.getElementById("searchRespondent")
+    .value.trim().toLowerCase();
+
+  const filtered = responses
+    .filter(response =>
+      response.id.toLowerCase().includes(search)
+    )
+    .sort((a, b) => a.id.localeCompare(b.id));
+
+  if (!filtered.length) {
+    root.textContent = summaryLoaded
+      ? "Tidak ada responden yang tercatat."
+      : "Memuat data...";
+    return;
+  }
+
+  const list = document.createElement("ol");
+  list.className = "respondent-list";
+
+  filtered.forEach(response => {
+    const item = document.createElement("li");
+    item.textContent = response.id;
+    list.appendChild(item);
+  });
+
+  root.innerHTML = "";
+  root.appendChild(list);
+
+  const note = document.createElement("p");
+  note.className = "small";
+  note.textContent =
+    "Menampilkan " + filtered.length + " responden.";
+
+  root.appendChild(note);
+}
+
+/* =====================================================
+   MENGIRIM JAWABAN KE GOOGLE APPS SCRIPT
+   ===================================================== */
+
+document.getElementById("surveyForm")
+  .addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    if (!this.reportValidity()) {
+      return;
+    }
+
+    if (!APP_SCRIPT_URL ||
+        APP_SCRIPT_URL.startsWith("GANTI_")) {
+      alert("URL Web App Apps Script belum diisi.");
+      return;
+    }
+
+    const id = document.getElementById("respondentId")
+      .value.trim();
+
+    if (!id) {
+      alert("ID responden wajib diisi.");
+      return;
+    }
+
+    const answers = {};
+
+    for (let i = 1; i <= 10; i++) {
+      const selected = this.querySelector(
+        'input[name="q' + i + '"]:checked'
+      );
+
+      if (!selected) {
+        alert("Mohon jawab semua pertanyaan pilihan ganda.");
+        return;
+      }
+
+      answers["q" + i] = selected.value;
+    }
+
+    const payload = {
+      respondentId: id,
+      answers: answers,
+      suggestions: document.getElementById("suggestions")
+        .value.trim()
+    };
+
+    const button = document.getElementById("submitBtn");
+    const status = document.getElementById("formStatus");
+
+    button.disabled = true;
+    status.className = "status";
+    status.textContent = "Mengirim jawaban...";
+
+    try {
+      await fetch(APP_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type":
+            "application/x-www-form-urlencoded;charset=UTF-8"
+        },
+        body: new URLSearchParams({
+          data: JSON.stringify(payload)
+        }).toString()
+      });
+
+      status.className = "status success";
+      status.textContent =
+        "Permintaan pengiriman telah dikirim. Rekap akan dimuat ulang dalam 2 detik.";
+
+      this.reset();
+
+      /*
+       * Memuat ulang rekap satu kali setelah pengiriman.
+       * Tidak ada pembaruan otomatis setiap 60 detik.
+       */
+      setTimeout(loadSummary, 2000);
+
+    } catch (error) {
+      status.className = "status error";
+      status.textContent =
+        "Pengiriman gagal. Periksa koneksi internet lalu coba lagi.";
+
+      console.error(error);
+
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+/* Inisialisasi halaman */
+renderQuestions();
+loadSummary();
+</script>
+</body>
+</html>
