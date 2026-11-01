@@ -362,24 +362,30 @@
 
     <div class="container">
 
-        <!-- FORM EVALUASI -->
+        <!-- TOMBOL / FORM EVALUASI -->
         <div class="card">
-            <label for="pengguna">Pengisi - ID_Sektor ID_Kelas ID_Anggota</label>
-            <span class="sub-label">Contoh: RW IA401 WAC01</span>
-            <input id="pengguna" type="text" placeholder="Contoh: RW IA401 WAC01" autocomplete="off">
+            <!-- Tombol Pengganti Saat Pertama Masuk -->
+            <button id="btnBukaForm" onclick="bukaFormEvaluasi()">Input Evaluasi</button>
 
-            <div id="evaluasiList">
-                <!-- Generator Pertanyaan via Script -->
+            <!-- Konten Form Evaluasi (Disembunyikan Awalnya) -->
+            <div id="formContainer" style="display: none;">
+                <label for="pengguna">Pengisi - ID_Sektor ID_Kelas ID_Anggota</label>
+                <span class="sub-label">Contoh: RW IA401 WAC01</span>
+                <input id="pengguna" type="text" placeholder="Contoh: RW IA401 WAC01" autocomplete="off">
+
+                <div id="evaluasiList">
+                    <!-- Generator Pertanyaan via Script -->
+                </div>
+
+                <!-- F. Usul dan Saran -->
+                <div class="section-header">F. Usul dan Saran</div>
+                <div class="q-item">
+                    <div class="q-text">Berikan usul dan saran Anda untuk perbaikan kegiatan mendatang:</div>
+                    <textarea id="saranText" rows="3" placeholder="Tuliskan usul dan saran di sini..."></textarea>
+                </div>
+
+                <button id="btnSimpan" onclick="simpan()">Simpan Evaluasi</button>
             </div>
-
-            <!-- F. Usul dan Saran -->
-            <div class="section-header">F. Usul dan Saran</div>
-            <div class="q-item">
-                <div class="q-text">Berikan usul dan saran Anda untuk perbaikan kegiatan mendatang:</div>
-                <textarea id="saranText" rows="3" placeholder="Tuliskan usul dan saran di sini..."></textarea>
-            </div>
-
-            <button id="btnSimpan" onclick="simpan()">Simpan Evaluasi</button>
         </div>
 
         <!-- STATISTIK PENGISI -->
@@ -514,24 +520,21 @@
             loadData();
 
             const inputPengguna = document.getElementById("pengguna");
-
-            // 1. Muat ID Pengisi dari LocalStorage jika ada
-            const savedPengguna = localStorage.getItem("evaluasi_pengguna");
-            if (savedPengguna) {
-                inputPengguna.value = savedPengguna;
-            }
-
             inputPengguna.addEventListener("input", function () {
                 this.value = this.value.toUpperCase();
-                // Simpan ID secara realtime ke LocalStorage
-                localStorage.setItem("evaluasi_pengguna", this.value);
             });
-
             inputPengguna.addEventListener("blur", function () {
                 this.value = bersihkanPengguna(this.value);
-                localStorage.setItem("evaluasi_pengguna", this.value);
             });
         });
+
+        // =========================
+        // FUNGSI BUKA FORM EVALUASI
+        // =========================
+        function bukaFormEvaluasi() {
+            document.getElementById("btnBukaForm").style.display = "none";
+            document.getElementById("formContainer").style.display = "block";
+        }
 
         // =========================
         // RENDER FORM EVALUASI
@@ -789,22 +792,6 @@
 
             let saranText = document.getElementById("saranText").value.trim();
 
-            // ==========================================
-            // PENCEGAHAN DUPLIKASI DATA (HUMAN ERROR)
-            // ==========================================
-            const isianHash = JSON.stringify({
-                pengguna: pengguna,
-                jawaban: jawabanEvaluasi,
-                saran: saranText
-            });
-
-            let riwayatIsian = JSON.parse(localStorage.getItem("evaluasi_riwayat") || "[]");
-
-            if (riwayatIsian.includes(isianHash)) {
-                snackbar("⚠️ Anda sudah pernah mengirimkan data ini!");
-                return;
-            }
-
             let tombol = document.getElementById("btnSimpan");
             tombol.disabled = true;
             tombol.innerHTML = "Menyimpan...";
@@ -822,16 +809,14 @@
 
                 if (hasil.success) {
                     snackbar("Evaluasi berhasil disimpan!");
-
-                    // Simpan ID pengguna & riwayat submit ke LocalStorage
-                    localStorage.setItem("evaluasi_pengguna", pengguna);
-                    riwayatIsian.push(isianHash);
-                    localStorage.setItem("evaluasi_riwayat", JSON.stringify(riwayatIsian));
-
-                    // Reset textarea saran saja (ID Pengisi tetap ada)
+                    document.getElementById("pengguna").value = "";
                     document.getElementById("saranText").value = "";
                     renderFormEvaluasi();
                     loadData();
+                    
+                    // Sembunyikan kembali form dan tampilkan tombol input evaluasi
+                    document.getElementById("formContainer").style.display = "none";
+                    document.getElementById("btnBukaForm").style.display = "block";
                 } else {
                     snackbar(hasil.message || "Gagal menyimpan data");
                 }
