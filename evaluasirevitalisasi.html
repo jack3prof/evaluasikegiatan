@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluasi Revitalisasi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2, h3 {
+            color: #333;
+            text-align: center;
+        }
+        .rekap-section {
+            margin-top: 20px;
+        }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 25px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            min-width: 500px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+        .loading {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+        }
+
+        .sektor-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .kelas-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+            background-color: #f1f3f5;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .kelas-list:empty {
+            display: none;
+        }
+
+        .btn-sektor, .btn-kelas {
+            padding: 8px 16px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-sektor.active, .btn-kelas.active {
+            background-color: #007BFF;
+        }
+        .kelas-card {
+            background: #fafafa;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 6px;
+            max-width: 550px;
+            margin: 0 auto 20px auto;
+        }
+        .kelas-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #007BFF;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .question-group {
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .question-group label.title-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .radio-options {
+            display: flex;
+            gap: 20px;
+            margin-top: 6px;
+            justify-content: center;
+        }
+        .radio-options label {
+            font-weight: normal;
+            cursor: pointer;
+        }
+        input[type="text"], select {
+            width: 100%;
+            max-width: 250px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        button.btn-simpan {
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        button.btn-simpan:hover { background-color: #218838; }
+        
+        .feedback-info {
+            background: #e8f4fd;
+            border: 1px solid #b6d4fe;
+            padding: 15px;
+            border-radius: 6px;
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+            font-size: 13px;
+            color: #333;
+        }
+        .feedback-info ul {
+            margin: 5px 0 0 20px;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Evaluasi Revitalisasi</h2>
+    
+    <h3>Form Evaluasi Kelas</h3>
+    
+    <!-- Keterangan Poin Feedback -->
+    <div class="feedback-info">
+        <b>Poin yang hendak dimintakan feedback:</b>
+        <ul>
+            <li>Kesehatan kelas - output</li>
+            <li>Optimalisasi Tarbiyah dzatiyah melalui SEBLAK - output</li>
+            <li>Serius dengan proyek kelas - outcome</li>
+        </ul>
+    </div>
+
+    <p style="text-align: center; font-size: 13px; color: #555;">Pilih Sektor terlebih dahulu, lalu pilih Kelas.</p>
+    
+    <!-- Step 1: List Sektor -->
+    <div class="sektor-list" id="sektor-container"></div>
+
+    <!-- Step 2: List Kelas -->
+    <div class="kelas-list" id="kelas-container"></div>
+
+    <!-- Step 3: Form Evaluasi Kelas -->
+    <div id="kelas-form-container"></div>
+
+    <hr style="margin: 30px 0;">
+
+    <!-- Bagian Rekapitulasi Data -->
+    <div class="rekap-section">
+        <h3>Rekapitulasi Evaluasi Revitalisasi Kelas</h3>
+        <div id="loading-status" class="loading">Memuat data rekap...</div>
+
+        <!-- Rekap 1: Diskusi & Pendalaman Materi -->
+        <h4>1. Rekapitulasi Diskusi & Pendalaman Materi per Sektor</h4>
+        <div class="table-responsive">
+            <table id="table-rekap-1" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Sektor</th>
+                        <th>Total Kelas</th>
+                        <th>Sudah</th>
+                        <th>Belum</th>
+                        <th>Belum Mengisi</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-rekap-1"></tbody>
+            </table>
+        </div>
+
+        <!-- Rekap 2: Pelaksanaan Tarbiyah Dzatiyah -->
+        <h4>2. Rekapitulasi Pelaksanaan Tarbiyah Dzatiyah per Sektor</h4>
+        <div class="table-responsive">
+            <table id="table-rekap-2" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Sektor</th>
+                        <th>Total Kelas</th>
+                        <th>Sudah</th>
+                        <th>Belum</th>
+                        <th>Belum Mengisi</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-rekap-2"></tbody>
+            </table>
+        </div>
+
+        <!-- Rekap 3: Realisasi Proyek Kelas -->
+        <h4>3. Rekapitulasi Realisasi Proyek Kelas per Sektor</h4>
+        <div class="table-responsive">
+            <table id="table-rekap-3" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Sektor</th>
+                        <th>Total Kelas</th>
+                        <th>Belum Mengisi</th>
+                        <th>Capaian Rata-rata</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-rekap-3"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxfT01ySwCD6q10p0hxfs06j66umujA_85ZrJN7XdRPOgLeXmOX9ATxW4g2M9U7PcTB/exec"; 
+    const SPREADSHEET_ID = "1HsWlnllQVtC3I2sVIbeNHVx7xR1XWAwkerDMdzrGyVk"; 
+    const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=data`;
+
+    let masterData = [
+        {id_sektor:"SU", id_kelas:"AA401"}, {id_sektor:"SU", id_kelas:"AA401"}, {id_sektor:"SU", id_kelas:"AA401"}, {id_sektor:"SU", id_kelas:"AA401"}, {id_sektor:"SU", id_kelas:"AA401"}, {id_sektor:"SU", id_kelas:"AA401"}, {id_sektor:"SU", id_kelas:"AA401"}, {id_sektor:"SU", id_kelas:"IA303"}, {id_sektor:"SU", id_kelas:"IA508"}, {id_sektor:"SU", id_kelas:"IA303"}, 
+        {id_sektor:"SU", id_kelas:"IA303"}, {id_sektor:"SU", id_kelas:"IA402"}, {id_sektor:"SU", id_kelas:"AA301"}, {id_sektor:"SU", id_kelas:"AA301"}, {id_sektor:"SU", id_kelas:"IA508"}, {id_sektor:"SU", id_kelas:"AA301"}, {id_sektor:"SU", id_kelas:"IA508"}, {id_sektor:"SU", id_kelas:"IA508"}, {id_sektor:"SU", id_kelas:"IA304"}, {id_sektor:"SU", id_kelas:"IA508"}, 
+        {id_sektor:"SU", id_kelas:"IA508"}, {id_sektor:"SU", id_kelas:"AA401"}, {id_sektor:"SU", id_kelas:"IA508"}, {id_sektor:"SU", id_kelas:"IA303"}, {id_sektor:"SU", id_kelas:"AA301"}, {id_sektor:"SU", id_kelas:"IA304"}, {id_sektor:"SU", id_kelas:"AA301"}, {id_sektor:"SU", id_kelas:"IA401"}, {id_sektor:"SU", id_kelas:"AA301"}, {id_sektor:"SU", id_kelas:"AA301"}, 
+        {id_sektor:"SU", id_kelas:"IA401"}, {id_sektor:"SU", id_kelas:"IA303"}, {id_sektor:"SU", id_kelas:"AA401"}, {id_sektor:"SU", id_kelas:"AA401"}, {id_sektor:"SU", id_kelas:"IA304"}, {id_sektor:"SU", id_kelas:"IA402"}, {id_sektor:"SU", id_kelas:"IA304"}, {id_sektor:"SU", id_kelas:"IA302"}, {id_sektor:"SU", id_kelas:"IA302"}, {id_sektor:"SU", id_kelas:"IA302"}, 
+        {id_sektor:"SU", id_kelas:"IA302"}, {id_sektor:"SU", id_kelas:"AA301"}, {id_sektor:"SU", id_kelas:"IA402"}, {id_sektor:"SU", id_kelas:"AA301"}, {id_sektor:"SU", id_kelas:"IA303"}, {id_sektor:"SU", id_kelas:"AA301"}, {id_sektor:"SU", id_kelas:"AA301"}, {id_sektor:"SU", id_kelas:"IA303"}, {id_sektor:"SU", id_kelas:"IA303"}, {id_sektor:"SU", id_kelas:"IA402"}, 
+        {id_sektor:"SU", id_kelas:"AA301"}, {id_sektor:"SU", id_kelas:"IA302"}, {id_sektor:"SL", id_kelas:"IA402"}, {id_sektor:"SL", id_kelas:"IA401"}, {id_sektor:"SL", id_kelas:"AA301"}, {id_sektor:"SL", id_kelas:"IA402"}, {id_sektor:"SL", id_kelas:"IA401"}, {id_sektor:"SL", id_kelas:"IA302"}, {id_sektor:"SL", id_kelas:"IA302"}, {id_sektor:"SL", id_kelas:"IA302"}, 
+        {id_sektor:"SL", id_kelas:"IA302"}, {id_sektor:"SL", id_kelas:"IA301"}, {id_sektor:"SL", id_kelas:"IA301"}, {id_sektor:"SL", id_kelas:"IA402"}, {id_sektor:"SL", id_kelas:"AA301"}, {id_sektor:"SL", id_kelas:"AA301"}, {id_sektor:"SL", id_kelas:"AA301"}, {id_sektor:"SL", id_kelas:"AA301"}, {id_sektor:"SL", id_kelas:"AA301"}, {id_sektor:"SL", id_kelas:"AA301"}, 
+        {id_sektor:"SL", id_kelas:"AA301"}, {id_sektor:"SL", id_kelas:"AA301"}, {id_sektor:"SL", id_kelas:"AA301"}, {id_sektor:"SL", id_kelas:"IA401"}, {id_sektor:"SL", id_kelas:"IA401"}, {id_sektor:"SL", id_kelas:"IA402"}, {id_sektor:"SL", id_kelas:"AA303"}, {id_sektor:"SL", id_kelas:"IA401"}, {id_sektor:"SL", id_kelas:"IA402"}, {id_sektor:"SL", id_kelas:"IA401"}, 
+        {id_sektor:"SL", id_kelas:"IA302"}, {id_sektor:"SL", id_kelas:"IA301"}, {id_sektor:"SL", id_kelas:"IA502"}, {id_sektor:"SL", id_kelas:"IA301"}, {id_sektor:"SL", id_kelas:"IA302"}, {id_sektor:"SL", id_kelas:"IA302"}, {id_sektor:"SL", id_kelas:"AA301"}, {id_sektor:"SA", id_kelas:"AA402"}, {id_sektor:"SA", id_kelas:"IA301"}, {id_sektor:"SA", id_kelas:"AA402"}, 
+        {id_sektor:"SA", id_kelas:"AA401"}, {id_sektor:"SA", id_kelas:"IA302"}, {id_sektor:"SA", id_kelas:"IA401"}, {id_sektor:"SA", id_kelas:"AA401"}, {id_sektor:"SA", id_kelas:"AA401"}, {id_sektor:"SA", id_kelas:"AA402"}, {id_sektor:"SA", id_kelas:"IA505"}, {id_sektor:"SA", id_kelas:"IA505"}, {id_sektor:"SA", id_kelas:"AA308"}, {id_sektor:"SA", id_kelas:"AA308"}, 
+        {id_sektor:"SA", id_kelas:"AA308"}, {id_sektor:"SA", id_kelas:"AA308"}, {id_sektor:"SA", id_kelas:"AA308"}, {id_sektor:"SA", id_kelas:"AA305"}, {id_sektor:"SA", id_kelas:"AA305"}, {id_sektor:"SA", id_kelas:"AA305"}, {id_sektor:"SA", id_kelas:"AA305"}, {id_sektor:"SA", id_kelas:"AA401"}, {id_sektor:"SA", id_kelas:"AA403"}, {id_sektor:"SA", id_kelas:"AA401"}, 
+        {id_sektor:"SA", id_kelas:"AA401"}, {id_sektor:"SA", id_kelas:"AA306"}, {id_sektor:"SA", id_kelas:"AA304"}, {id_sektor:"SA", id_kelas:"AA304"}, {id_sektor:"SA", id_kelas:"AA304"}, {id_sektor:"SA", id_kelas:"AA304"}, {id_sektor:"SA", id_kelas:"AA304"}, {id_sektor:"SA", id_kelas:"AA304"}, {id_sektor:"SA", id_kelas:"AA304"}, {id_sektor:"SA", id_kelas:"AA304"}, 
+        {id_sektor:"SA", id_kelas:"AA304"}, {id_sektor:"SA", id_kelas:"IA401"}, {id_sektor:"SA", id_kelas:"IA505"}, {id_sektor:"SA", id_kelas:"IA401"}, {id_sektor:"SA", id_kelas:"IA401"}, {id_sektor:"SA", id_kelas:"IA401"}, {id_sektor:"SA", id_kelas:"AA301"}, {id_sektor:"SA", id_kelas:"AA301"}, {id_sektor:"SA", id_kelas:"AA301"}, {id_sektor:"SA", id_kelas:"AA301"}, 
+        {id_sektor:"SA", id_kelas:"IA301"}, {id_sektor:"SA", id_kelas:"AA302"}, {id_sektor:"SA", id_kelas:"AA302"}, {id_sektor:"SA", id_kelas:"AA302"}, {id_sektor:"SA", id_kelas:"AA302"}, {id_sektor:"SA", id_kelas:"AA302"}, {id_sektor:"SA", id_kelas:"AA307"}, {id_sektor:"SA", id_kelas:"AA307"}, {id_sektor:"SA", id_kelas:"IA505"}, {id_sektor:"SA", id_kelas:"IA505"}, 
+        {id_sektor:"SA", id_kelas:"IA505"}, {id_sektor:"SA", id_kelas:"IA505"}, {id_sektor:"SA", id_kelas:"IA505"}, {id_sektor:"SA", id_kelas:"AA306"}, {id_sektor:"SA", id_kelas:"AA307"}, {id_sektor:"SA", id_kelas:"AA307"}, {id_sektor:"SA", id_kelas:"AA402"}, {id_sektor:"SA", id_kelas:"AA402"}, {id_sektor:"SA", id_kelas:"AA402"}, {id_sektor:"SA", id_kelas:"AA403"}, 
+        {id_sektor:"SA", id_kelas:"AA403"}, {id_sektor:"SA", id_kelas:"AA307"}, {id_sektor:"SA", id_kelas:"AA303"}, {id_sektor:"SA", id_kelas:"AA303"}, {id_sektor:"SA", id_kelas:"AA403"}, {id_sektor:"SA", id_kelas:"AA403"}, {id_sektor:"SA", id_kelas:"AA307"}, {id_sektor:"SA", id_kelas:"IA301"}, {id_sektor:"SA", id_kelas:"IA301"}, {id_sektor:"SA", id_kelas:"AA303"}, 
+        {id_sektor:"SA", id_kelas:"AA306"}, {id_sektor:"SA", id_kelas:"AA306"}, {id_sektor:"SA", id_kelas:"AA301"}, {id_sektor:"SA", id_kelas:"AA301"}, {id_sektor:"SA", id_kelas:"AA301"}, {id_sektor:"SA", id_kelas:"AA301"}, {id_sektor:"SA", id_kelas:"IA402"}, {id_sektor:"SA", id_kelas:"IA401"}, {id_sektor:"SA", id_kelas:"IA401"}, {id_sektor:"SA", id_kelas:"IA401"}, 
+        {id_sektor:"SA", id_kelas:"IA301"}, {id_sektor:"SA", id_kelas:"IA301"}, {id_sektor:"SA", id_kelas:"IA301"}, {id_sektor:"SA", id_kelas:"IA303"}, {id_sektor:"SA", id_kelas:"IA303"}, {id_sektor:"SA", id_kelas:"IA303"}, {id_sektor:"SA", id_kelas:"IA301"}, {id_sektor:"SA", id_kelas:"IA301"}, {id_sektor:"SA", id_kelas:"IA303"}, {id_sektor:"SA", id_kelas:"IA305"}, 
+        {id_sektor:"SA", id_kelas:"IA302"}, {id_sektor:"SA", id_kelas:"IA302"}, {id_sektor:"SA", id_kelas:"IA302"}, {id_sektor:"SA", id_kelas:"IA302"}, {id_sektor:"SA", id_kelas:"AA303"}, {id_sektor:"SA", id_kelas:"IA302"}, {id_sektor:"SA", id_kelas:"AA306"}, {id_sektor:"SA", id_kelas:"IA401"}, {id_sektor:"SA", id_kelas:"AA307"}, {id_sektor:"SA", id_kelas:"AA307"}, 
+        {id_sektor:"SA", id_kelas:"AA303"}, {id_sektor:"SA", id_kelas:"IA303"}, {id_sektor:"SA", id_kelas:"IA303"}, {id_sektor:"SA", id_kelas:"AA403"}, {id_sektor:"SA", id_kelas:"IA303"}, {id_sektor:"SA", id_kelas:"IA402"}, {id_sektor:"SA", id_kelas:"IA401"}, {id_sektor:"RW", id_kelas:"IA504"}, {id_sektor:"RW", id_kelas:"AA502"}, {id_sektor:"RW", id_kelas:"AX401"}, 
+        {id_sektor:"RW", id_kelas:"AX401"}, {id_sektor:"RW", id_kelas:"AX401"}, {id_sektor:"RW", id_kelas:"AX401"}, {id_sektor:"RW", id_kelas:"AX401"}, {id_sektor:"RW", id_kelas:"AX401"}, {id_sektor:"RW", id_kelas:"AX301"}, {id_sektor:"RW", id_kelas:"AX301"}, {id_sektor:"RW", id_kelas:"IA504"}, {id_sektor:"RW", id_kelas:"IA504"}, {id_sektor:"RW", id_kelas:"AA502"}, 
+        {id_sektor:"RW", id_kelas:"AX301"}, {id_sektor:"RW", id_kelas:"IA303"}, {id_sektor:"RW", id_kelas:"AX402"}, {id_sektor:"RW", id_kelas:"AX401"}, {id_sektor:"RW", id_kelas:"IA401"}, {id_sektor:"RW", id_kelas:"IA402"}, {id_sektor:"RW", id_kelas:"IA302"}, {id_sektor:"RW", id_kelas:"IA402"}, {id_sektor:"RW", id_kelas:"IA504"}, {id_sektor:"RW", id_kelas:"IA305"}, 
+        {id_sektor:"RW", id_kelas:"AA301"}, {id_sektor:"RW", id_kelas:"IA402"}, {id_sektor:"RW", id_kelas:"IA302"}, {id_sektor:"RW", id_kelas:"IA504"}, {id_sektor:"RW", id_kelas:"AX402"}, {id_sektor:"RW", id_kelas:"IA402"}, {id_sektor:"RW", id_kelas:"AX401"}, {id_sektor:"RW", id_kelas:"AX401"}, {id_sektor:"RW", id_kelas:"AX401"}, {id_sektor:"RW", id_kelas:"IA304"}, 
+        {id_sektor:"RW", id_kelas:"IA304"}, {id_sektor:"RW", id_kelas:"IA304"}, {id_sektor:"RW", id_kelas:"IA401"}, {id_sektor:"RW", id_kelas:"IA401"}, {id_sektor:"RW", id_kelas:"IA401"}, {id_sektor:"RW", id_kelas:"IA401"}, {id_sektor:"RW", id_kelas:"IA401"}, {id_sektor:"RW", id_kelas:"AX402"}, {id_sektor:"RW", id_kelas:"IA305"}, {id_sektor:"RW", id_kelas:"IA305"}, 
+        {id_sektor:"RW", id_kelas:"IA303"}, {id_sektor:"RW", id_kelas:"IA303"}, {id_sektor:"RW", id_kelas:"IA401"}, {id_sektor:"RW", id_kelas:"AX301"}, {id_sektor:"RW", id_kelas:"AX301"}, {id_sektor:"RW", id_kelas:"AA502"}, {id_sektor:"RW", id_kelas:"IA504"}, {id_sektor:"RW", id_kelas:"AA502"}, {id_sektor:"RW", id_kelas:"AA301"}, {id_sektor:"RW", id_kelas:"IA504"}, 
+        {id_sektor:"RW", id_kelas:"IA301"}, {id_sektor:"RW", id_kelas:"IA302"}, {id_sektor:"RW", id_kelas:"IA402"}, {id_sektor:"RW", id_kelas:"IA301"}, {id_sektor:"RW", id_kelas:"IA301"}, {id_sektor:"RW", id_kelas:"IA402"}, {id_sektor:"RW", id_kelas:"IA504"}, {id_sektor:"RW", id_kelas:"IA402"}, {id_sektor:"RW", id_kelas:"IA402"}, {id_sektor:"RW", id_kelas:"IA504"}, 
+        {id_sektor:"RW", id_kelas:"IA504"}, {id_sektor:"RW", id_kelas:"IA305"}, {id_sektor:"RW", id_kelas:"AX301"}, {id_sektor:"RW", id_kelas:"IA305"}, {id_sektor:"RW", id_kelas:"IA401"}, {id_sektor:"RW", id_kelas:"AX401"}, {id_sektor:"RW", id_kelas:"IA303"}, {id_sektor:"RW", id_kelas:"IA303"}, {id_sektor:"RW", id_kelas:"IA301"}, {id_sektor:"RW", id_kelas:"AA301"}, 
+        {id_sektor:"RW", id_kelas:"AX402"}, {id_sektor:"RW", id_kelas:"AA301"}, {id_sektor:"RW", id_kelas:"IA302"}, {id_sektor:"RW", id_kelas:"IA402"}, {id_sektor:"RG", id_kelas:"AA401"}, {id_sektor:"RG", id_kelas:"IA303"}, {id_sektor:"RG", id_kelas:"IA303"}, {id_sektor:"RG", id_kelas:"AA401"}, {id_sektor:"RG", id_kelas:"IA401"}, {id_sektor:"RG", id_kelas:"AA401"}, 
+        {id_sektor:"RG", id_kelas:"IA303"}, {id_sektor:"RG", id_kelas:"IA303"}, {id_sektor:"RG", id_kelas:"IA303"}, {id_sektor:"RG", id_kelas:"AA401"}, {id_sektor:"RG", id_kelas:"AA401"}, {id_sektor:"RG", id_kelas:"IA401"}, {id_sektor:"RG", id_kelas:"IA401"}, {id_sektor:"RG", id_kelas:"IA401"}, {id_sektor:"RG", id_kelas:"IA401"}, {id_sektor:"RG", id_kelas:"AA301"}, 
+        {id_sektor:"RG", id_kelas:"AA301"}, {id_sektor:"RG", id_kelas:"AA302"}, {id_sektor:"RG", id_kelas:"AA302"}, {id_sektor:"RG", id_kelas:"AA302"}, {id_sektor:"RG", id_kelas:"AA302"}, {id_sektor:"RG", id_kelas:"IA303"}, {id_sektor:"RG", id_kelas:"AA401"}, {id_sektor:"RG", id_kelas:"AA301"}, {id_sektor:"RG", id_kelas:"AA301"}, {id_sektor:"RG", id_kelas:"AA401"}, 
+        {id_sektor:"RG", id_kelas:"AA301"}, {id_sektor:"RG", id_kelas:"IA304"}, {id_sektor:"RG", id_kelas:"IA304"}, {id_sektor:"RG", id_kelas:"IA304"}, {id_sektor:"RG", id_kelas:"IA304"}, {id_sektor:"RG", id_kelas:"AA301"}, {id_sektor:"RG", id_kelas:"IA401"}, {id_sektor:"RG", id_kelas:"IA305"}, {id_sektor:"RG", id_kelas:"IA305"}, {id_sektor:"RG", id_kelas:"IA305"}, 
+        {id_sektor:"RG", id_kelas:"IA305"}, {id_sektor:"RG", id_kelas:"IA305"}, {id_sektor:"RG", id_kelas:"IA305"}, {id_sektor:"RG", id_kelas:"IA301"}, {id_sektor:"RG", id_kelas:"IA301"}, {id_sektor:"RG", id_kelas:"IA304"}, {id_sektor:"RG", id_kelas:"IA302"}, {id_sektor:"RG", id_kelas:"AA302"}, {id_sektor:"RG", id_kelas:"AA301"}, {id_sektor:"RG", id_kelas:"IA401"}, 
+        {id_sektor:"RG", id_kelas:"IA301"}, {id_sektor:"RG", id_kelas:"IA301"}, {id_sektor:"RG", id_kelas:"IA301"}, {id_sektor:"RG", id_kelas:"IA301"}, {id_sektor:"PR", id_kelas:"AA501"}, {id_sektor:"PR", id_kelas:"AA501"}, {id_sektor:"PR", id_kelas:"AA402"}, {id_sektor:"PR", id_kelas:"AA501"}, {id_sektor:"PR", id_kelas:"AA501"}, {id_sektor:"PR", id_kelas:"AA501"}, 
+        {id_sektor:"PR", id_kelas:"IA301"}, {id_sektor:"PR", id_kelas:"IA506"}, {id_sektor:"PR", id_kelas:"IA401"}, {id_sektor:"PR", id_kelas:"AA301"}, {id_sektor:"PR", id_kelas:"IA401"}, {id_sektor:"PR", id_kelas:"AA402"}, {id_sektor:"PR", id_kelas:"IA506"}, {id_sektor:"PR", id_kelas:"AA302"}, {id_sektor:"PR", id_kelas:"AX301"}, {id_sektor:"PR", id_kelas:"AA501"}, 
+        {id_sektor:"PR", id_kelas:"IA401"}, {id_sektor:"PR", id_kelas:"AA303"}, {id_sektor:"PR", id_kelas:"AA303"}, {id_sektor:"PR", id_kelas:"AA303"}, {id_sektor:"PR", id_kelas:"IA401"}, {id_sektor:"PR", id_kelas:"AA301"}, {id_sektor:"PR", id_kelas:"IA302"}, {id_sektor:"PR", id_kelas:"AA301"}, {id_sektor:"PR", id_kelas:"AA401"}, {id_sektor:"PR", id_kelas:"AA302"}, 
+        {id_sektor:"PR", id_kelas:"AA501"}, {id_sektor:"PR", id_kelas:"AA301"}, {id_sektor:"PR", id_kelas:"AA301"}, {id_sektor:"PR", id_kelas:"AA303"}, {id_sektor:"PR", id_kelas:"AA401"}, {id_sektor:"PR", id_kelas:"AA301"}, {id_sektor:"PR", id_kelas:"AA401"}, {id_sektor:"PR", id_kelas:"AA302"}, {id_sektor:"PR", id_kelas:"AA302"}, {id_sektor:"PR", id_kelas:"AA302"}, 
+        {id_sektor:"PR", id_kelas:"IA506"}, {id_sektor:"PR", id_kelas:"AA302"}, {id_sektor:"PR", id_kelas:"IA302"}, {id_sektor:"PR", id_kelas:"AA401"}, {id_sektor:"PR", id_kelas:"IA301"}, {id_sektor:"PR", id_kelas:"IA301"}, {id_sektor:"PR", id_kelas:"IA301"}, {id_sektor:"PR", id_kelas:"AX301"}, {id_sektor:"PR", id_kelas:"AX301"}, {id_sektor:"PR", id_kelas:"IA301"}, 
+        {id_sektor:"PR", id_kelas:"IA401"}, {id_sektor:"PR", id_kelas:"AA501"}, {id_sektor:"PR", id_kelas:"AA402"}, {id_sektor:"PR", id_kelas:"IA506"}, {id_sektor:"PR", id_kelas:"IA506"}, {id_sektor:"PR", id_kelas:"IA401"}, {id_sektor:"PR", id_kelas:"AA401"}, {id_sektor:"PR", id_kelas:"AA402"}, {id_sektor:"PR", id_kelas:"IA506"}, {id_sektor:"PR", id_kelas:"AA401"}, 
+        {id_sektor:"PR", id_kelas:"AA401"}, {id_sektor:"PR", id_kelas:"IA301"}, {id_sektor:"PR", id_kelas:"IA301"}, {id_sektor:"PR", id_kelas:"AA402"}, {id_sektor:"PR", id_kelas:"IA506"}, {id_sektor:"PR", id_kelas:"IA302"}, {id_sektor:"PR", id_kelas:"IA401"}, {id_sektor:"PR", id_kelas:"IA302"}, {id_sektor:"PR", id_kelas:"IA401"}, {id_sektor:"PR", id_kelas:"IA302"}, 
+        {id_sektor:"PR", id_kelas:"IA401"}, {id_sektor:"PR", id_kelas:"AA402"}, {id_sektor:"PR", id_kelas:"IA302"}, {id_sektor:"MA", id_kelas:"AA401"}, {id_sektor:"MA", id_kelas:"AA401"}, {id_sektor:"MA", id_kelas:"AA301"}, {id_sektor:"MA", id_kelas:"AA302"}, {id_sektor:"MA", id_kelas:"IA301"}, {id_sektor:"MA", id_kelas:"IA301"}, {id_sektor:"MA", id_kelas:"IA301"}, 
+        {id_sektor:"MA", id_kelas:"IA301"}, {id_sektor:"MA", id_kelas:"AA401"}, {id_sektor:"MA", id_kelas:"IA301"}, {id_sektor:"MA", id_kelas:"AA302"}, {id_sektor:"MA", id_kelas:"AA301"}, {id_sektor:"MA", id_kelas:"AA302"}, {id_sektor:"MA", id_kelas:"AA302"}, {id_sektor:"MA", id_kelas:"AA302"}, {id_sektor:"MA", id_kelas:"AA301"}, {id_sektor:"MA", id_kelas:"AA301"}, 
+        {id_sektor:"MA", id_kelas:"AA301"}, {id_sektor:"GA", id_kelas:"IA404"}, {id_sektor:"GA", id_kelas:"IA404"}, {id_sektor:"GA", id_kelas:"IA404"}, {id_sektor:"GA", id_kelas:"IA404"}, {id_sektor:"GA", id_kelas:"IA306"}, {id_sektor:"GA", id_kelas:"IA306"}, {id_sektor:"GA", id_kelas:"IA404"}, {id_sektor:"GA", id_kelas:"IA402"}, {id_sektor:"GA", id_kelas:"IA507"}, {id_sektor:"GA", id_kelas:"IA404"}, 
+        {id_sektor:"GA", id_kelas:"IA302"}, {id_sektor:"GA", id_kelas:"IA302"}, {id_sektor:"GA", id_kelas:"AA301"}, {id_sektor:"GA", id_kelas:"IA301"}, {id_sektor:"GA", id_kelas:"AA302"}, {id_sektor:"GA", id_kelas:"IA404"}, {id_sektor:"GA", id_kelas:"IA306"}, {id_sektor:"GA", id_kelas:"IA507"}, {id_sektor:"GA", id_kelas:"IA401"}, {id_sektor:"GA", id_kelas:"IA401"}, 
+        {id_sektor:"GA", id_kelas:"IA507"}, {id_sektor:"GA", id_kelas:"IA401"}, {id_sektor:"GA", id_kelas:"AA301"}, {id_sektor:"GA", id_kelas:"AA302"}, {id_sektor:"GA", id_kelas:"IA507"}, {id_sektor:"GA", id_kelas:"AA301"}, {id_sektor:"GA", id_kelas:"AA301"}, {id_sektor:"GA", id_kelas:"AA401"}, {id_sektor:"GA", id_kelas:"IA402"}, {id_sektor:"GA", id_kelas:"IA302"}, 
+        {id_sektor:"GA", id_kelas:"IA302"}, {id_sektor:"GA", id_kelas:"IA405"}, {id_sektor:"GA", id_kelas:"IA402"}, {id_sektor:"GA", id_kelas:"IA402"}, {id_sektor:"GA", id_kelas:"IA402"}, {id_sektor:"GA", id_kelas:"IA507"}, {id_sektor:"GA", id_kelas:"IA405"}, {id_sektor:"GA", id_kelas:"IA405"}, {id_sektor:"GA", id_kelas:"IA403"}, {id_sektor:"GA", id_kelas:"IA403"}, 
+        {id_sektor:"GA", id_kelas:"IA403"}, {id_sektor:"GA", id_kelas:"IA403"}, {id_sektor:"GA", id_kelas:"IA403"}, {id_sektor:"GA", id_kelas:"IA403"}, {id_sektor:"GA", id_kelas:"IA507"}, {id_sektor:"GA", id_kelas:"IA401"}, {id_sektor:"GA", id_kelas:"IA404"}, {id_sektor:"GA", id_kelas:"IA507"}, {id_sektor:"GA", id_kelas:"IA405"}, {id_sektor:"GA", id_kelas:"IA301"}, 
+        {id_sektor:"GA", id_kelas:"IA305"}, {id_sektor:"GA", id_kelas:"IA305"}, {id_sektor:"GA", id_kelas:"IA301"}, {id_sektor:"GA", id_kelas:"IA301"}, {id_sektor:"GA", id_kelas:"IA301"}, {id_sektor:"GA", id_kelas:"IA507"}, {id_sektor:"GA", id_kelas:"IA304"}, {id_sektor:"GA", id_kelas:"IA305"}, {id_sektor:"GA", id_kelas:"IA305"}, {id_sektor:"GA", id_kelas:"IA306"}, 
+        {id_sektor:"GA", id_kelas:"IA401"}, {id_sektor:"GA", id_kelas:"IA401"}, {id_sektor:"GA", id_kelas:"IA401"}, {id_sektor:"GA", id_kelas:"IA405"}, {id_sektor:"GA", id_kelas:"IA307"}, {id_sektor:"GA", id_kelas:"IA405"}, {id_sektor:"GA", id_kelas:"AA301"}, {id_sektor:"GA", id_kelas:"IA306"}, {id_sektor:"GA", id_kelas:"IA303"}, {id_sektor:"GA", id_kelas:"IA303"}, 
+        {id_sektor:"GA", id_kelas:"IA403"}, {id_sektor:"GA", id_kelas:"IA303"}, {id_sektor:"GA", id_kelas:"IA305"}, {id_sektor:"GA", id_kelas:"IA307"}, {id_sektor:"GA", id_kelas:"IA307"}, {id_sektor:"GA", id_kelas:"IA403"}, {id_sektor:"GA", id_kelas:"IA307"}, {id_sektor:"GA", id_kelas:"IA303"}, {id_sektor:"GA", id_kelas:"IA303"}, {id_sektor:"GA", id_kelas:"IA303"}, 
+        {id_sektor:"GA", id_kelas:"AA401"}, {id_sektor:"GA", id_kelas:"IA403"}, {id_sektor:"GA", id_kelas:"AA401"}, {id_sektor:"GA", id_kelas:"AA302"}, {id_sektor:"GA", id_kelas:"IA402"}, {id_sektor:"GA", id_kelas:"IA302"}, {id_sektor:"GA", id_kelas:"IA306"}, {id_sektor:"GA", id_kelas:"IA402"}, {id_sektor:"GA", id_kelas:"IA304"}, {id_sektor:"GA", id_kelas:"IA304"}, 
+        {id_sektor:"GA", id_kelas:"IA304"}, {id_sektor:"GA", id_kelas:"IA304"}, {id_sektor:"GA", id_kelas:"IA304"}, {id_sektor:"GA", id_kelas:"IA507"}, {id_sektor:"GA", id_kelas:"IA307"}, {id_sektor:"GA", id_kelas:"AA302"}, {id_sektor:"GA", id_kelas:"IA303"}, {id_sektor:"GA", id_kelas:"IA302"}, {id_sektor:"GA", id_kelas:"IA402"}, {id_sektor:"GA", id_kelas:"IA301"}, 
+        {id_sektor:"GA", id_kelas:"IA303"}, {id_sektor:"GA", id_kelas:"IA304"}, {id_sektor:"GA", id_kelas:"IA507"}, {id_sektor:"GA", id_kelas:"AA301"}, {id_sektor:"GA", id_kelas:"IA420"}, {id_sektor:"GA", id_kelas:"IA405"}, {id_sektor:"BI", id_kelas:"IA303"}, {id_sektor:"BI", id_kelas:"IA302"}, {id_sektor:"BI", id_kelas:"IA303"}, 
+        {id_sektor:"BI", id_kelas:"IA301"}, {id_sektor:"BI", id_kelas:"IA401"}, {id_sektor:"BI", id_kelas:"IA401"}, {id_sektor:"BI", id_kelas:"IA402"}, {id_sektor:"BI", id_kelas:"IA402"}, {id_sektor:"BI", id_kelas:"IA402"}, {id_sektor:"BA", id_kelas:"AA401"}, {id_sektor:"BA", id_kelas:"AA401"}, {id_sektor:"BA", id_kelas:"IA403"}, {id_sektor:"BA", id_kelas:"IA302"}, 
+        {id_sektor:"BA", id_kelas:"IA305"}, {id_sektor:"BA", id_kelas:"IA503"}, {id_sektor:"BA", id_kelas:"IA501"}, {id_sektor:"BA", id_kelas:"IA404"}, {id_sektor:"BA", id_kelas:"IA302"}, {id_sektor:"BA", id_kelas:"AA401"}, {id_sektor:"BA", id_kelas:"IA402"}, {id_sektor:"BA", id_kelas:"AA303"}, {id_sektor:"BA", id_kelas:"AA303"}, {id_sektor:"BA", id_kelas:"AA303"}, 
+        {id_sektor:"BA", id_kelas:"AA302"}, {id_sektor:"BA", id_kelas:"IA403"}, {id_sektor:"BA", id_kelas:"IA303"}, {id_sektor:"BA", id_kelas:"IA302"}, {id_sektor:"BA", id_kelas:"IA302"}, {id_sektor:"BA", id_kelas:"IA302"}, {id_sektor:"BA", id_kelas:"IA303"}, {id_sektor:"BA", id_kelas:"IA503"}, {id_sektor:"BA", id_kelas:"IA403"}, {id_sektor:"BA", id_kelas:"IA403"}, 
+        {id_sektor:"BA", id_kelas:"IA503"}, {id_sektor:"BA", id_kelas:"IA503"}, {id_sektor:"BA", id_kelas:"IA501"}, {id_sektor:"BA", id_kelas:"IA503"}, {id_sektor:"BA", id_kelas:"IA404"}, {id_sektor:"BA", id_kelas:"IA404"}, {id_sektor:"BA", id_kelas:"IA404"}, {id_sektor:"BA", id_kelas:"IA404"}, {id_sektor:"BA", id_kelas:"IA401"}, {id_sektor:"BA", id_kelas:"IA401"}, 
+        {id_sektor:"BA", id_kelas:"AA302"}, {id_sektor:"BA", id_kelas:"AA302"}, {id_sektor:"BA", id_kelas:"AA302"}, {id_sektor:"BA", id_kelas:"IA304"}, {id_sektor:"BA", id_kelas:"IA304"}, {id_sektor:"BA", id_kelas:"IA304"}, {id_sektor:"BA", id_kelas:"IA301"}, {id_sektor:"BA", id_kelas:"IA503"}, {id_sektor:"BA", id_kelas:"IA302"}, {id_sektor:"BA", id_kelas:"IA301"}, 
+        {id_sektor:"BA", id_kelas:"IA301"}, {id_sektor:"BA", id_kelas:"IA305"}, {id_sektor:"BA", id_kelas:"IA305"}, {id_sektor:"BA", id_kelas:"IA305"}, {id_sektor:"BA", id_kelas:"IA305"}, {id_sektor:"BA", id_kelas:"IA301"}, {id_sektor:"BA", id_kelas:"AA302"}, {id_sektor:"BA", id_kelas:"IA301"}, {id_sektor:"BA", id_kelas:"AA401"}, {id_sektor:"BA", id_kelas:"AA302"}, 
+        {id_sektor:"BA", id_kelas:"AA303"}, {id_sektor:"BA", id_kelas:"AA304"}, {id_sektor:"BA", id_kelas:"AA301"}, {id_sektor:"BA", id_kelas:"AA401"}, {id_sektor:"BA", id_kelas:"AA301"}, {id_sektor:"BA", id_kelas:"AA301"}, {id_sektor:"BA", id_kelas:"IA301"}, {id_sektor:"BA", id_kelas:"AA302"}, {id_sektor:"BA", id_kelas:"AA302"}, {id_sektor:"BA", id_kelas:"AA302"}, 
+        {id_sektor:"BA", id_kelas:"AA401"}, {id_sektor:"BA", id_kelas:"AA401"}, {id_sektor:"BA", id_kelas:"IA301"}, {id_sektor:"BA", id_kelas:"IA402"}, {id_sektor:"BA", id_kelas:"AA301"}, {id_sektor:"BA", id_kelas:"AA301"}, {id_sektor:"BA", id_kelas:"AA303"}, {id_sektor:"BA", id_kelas:"IA402"}, {id_sektor:"BA", id_kelas:"IA402"}, {id_sektor:"BA", id_kelas:"IA402"}, 
+        {id_sektor:"BA", id_kelas:"IA403"}, {id_sektor:"BA", id_kelas:"IA403"}, {id_sektor:"BA", id_kelas:"IA301"}, {id_sektor:"BA", id_kelas:"IA404"}, {id_sektor:"BA", id_kelas:"AA305"}, {id_sektor:"BA", id_kelas:"IA301"}, {id_sektor:"BA", id_kelas:"IA304"}, {id_sektor:"BA", id_kelas:"AA301"}, {id_sektor:"BA", id_kelas:"IA401"}, {id_sektor:"BA", id_kelas:"IA403"}, 
+        {id_sektor:"BA", id_kelas:"AA303"}, {id_sektor:"BA", id_kelas:"IA302"}, {id_sektor:"BA", id_kelas:"IA401"}, {id_sektor:"BA", id_kelas:"IA302"}, {id_sektor:"BA", id_kelas:"AA301"}, {id_sektor:"BA", id_kelas:"IA301"}, {id_sektor:"BA", id_kelas:"AA301"}, {id_sektor:"BA", id_kelas:"IA301"}, {id_sektor:"BA", id_kelas:"IA305"}, {id_sektor:"BA", id_kelas:"IA402"}, 
+        {id_sektor:"BA", id_kelas:"IA304"}, {id_sektor:"BA", id_kelas:"IA304"}, {id_sektor:"BA", id_kelas:"IA403"}, {id_sektor:"BA", id_kelas:"IA403"}, {id_sektor:"BA", id_kelas:"IA403"}, {id_sektor:"BA", id_kelas:"IA403"}, {id_sektor:"BA", id_kelas:"IA401"}
+    ];
+
+    // 1. Ubah sektor kelas yang karakter ke-3 nya angka '5' menjadi "L5"
+    masterData.forEach(item => {
+        if (item.id_kelas && item.id_kelas.length >= 3 && item.id_kelas.charAt(2) === '5') {
+            item.id_sektor = "L5";
+        }
+    });
+
+    // 2. Hilangkan duplikasi gabungan (id_sektor + id_kelas) yang berulang
+    const seenSet = new Set();
+    masterData = masterData.filter(item => {
+        const uniqueKey = `${item.id_sektor}_${item.id_kelas}`;
+        if (seenSet.has(uniqueKey)) {
+            return false;
+        }
+        seenSet.add(uniqueKey);
+        return true;
+    });
+
+    let dataEvaluasiMap = {};
+    let selectedSektor = null;
+    let selectedKelas = null;
+
+    function getUniqueKey(sektor, kelas) {
+        return `${sektor}_${kelas}`;
+    }
+
+    function renderSektorList() {
+        const sekaSet = new Set(masterData.map(item => item.id_sektor));
+        let sektorList = Array.from(sekaSet).sort();
+
+        if (sektorList.includes("L5")) {
+            sektorList = sektorList.filter(s => s !== "L5");
+            sektorList.unshift("L5");
+        }
+
+        const container = document.getElementById('sektor-container');
+        container.innerHTML = '';
+        sektorList.forEach(sektor => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-sektor';
+            btn.innerText = (sektor === "L5") ? "L5" : `Sektor ${sektor}`;
+            btn.onclick = () => selectSektor(sektor, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    function selectSektor(sektor, btnElement) {
+        selectedSektor = sektor;
+        selectedKelas = null;
+        document.querySelectorAll('.btn-sektor').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+
+        document.getElementById('kelas-form-container').innerHTML = '';
+        renderKelasList(sektor);
+    }
+
+    function renderKelasList(sektor) {
+        const kelSet = new Set(masterData.filter(item => item.id_sektor === sektor).map(item => item.id_kelas));
+        const kelasList = Array.from(kelSet).sort();
+
+        const container = document.getElementById('kelas-container');
+        container.innerHTML = '';
+        kelasList.forEach(kelas => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-kelas';
+            btn.innerText = `Kelas ${kelas}`;
+            btn.onclick = () => selectKelas(kelas, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    function selectKelas(kelas, btnElement) {
+        selectedKelas = kelas;
+        document.querySelectorAll('.btn-kelas').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+
+        renderFormKelas(selectedSektor, kelas);
+    }
+
+    function renderFormKelas(sektor, kelas) {
+        const container = document.getElementById('kelas-form-container');
+        const uniqueKey = getUniqueKey(sektor, kelas);
+        const savedData = dataEvaluasiMap[uniqueKey] || {};
+        const valDiskusi = savedData.diskusi || '';
+        const valTarbiyah = savedData.tarbiyah || '';
+        const valProyek = savedData.proyek || '';
+
+        // Generate options for persentase from 10% to 100% (step 10%)
+        let optionsProyek = '<option value="">-- Pilih Prosentase --</option>';
+        for (let i = 10; i <= 100; i += 10) {
+            const valStr = i + '%';
+            optionsProyek += `<option value="${valStr}" ${valProyek === valStr ? 'selected' : ''}>${valStr}</option>`;
+        }
+
+        let html = `
+            <div class="kelas-card">
+                <div class="kelas-title">Evaluasi Sektor ${sektor} - Kelas ${kelas}</div>
+                
+                <div class="question-group">
+                    <label class="title-label">1. Diskusi dan pendalaman materi secara bertahap di kelas:</label>
+                    <div class="radio-options">
+                        <label><input type="radio" name="diskusi_${uniqueKey}" value="Sudah" ${valDiskusi === 'Sudah' ? 'checked' : ''}> Sudah</label>
+                        <label><input type="radio" name="diskusi_${uniqueKey}" value="Belum" ${valDiskusi === 'Belum' ? 'checked' : ''}> Belum</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <label class="title-label">2. Pelaksanaan tarbiyah dzatiyah bagi individu:</label>
+                    <div class="radio-options">
+                        <label><input type="radio" name="tarbiyah_${uniqueKey}" value="Sudah" ${valTarbiyah === 'Sudah' ? 'checked' : ''}> Sudah</label>
+                        <label><input type="radio" name="tarbiyah_${uniqueKey}" value="Belum" ${valTarbiyah === 'Belum' ? 'checked' : ''}> Belum</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <label class="title-label">3. Realisasi Proyek kelas (isi kembali bila progres bertambah):</label>
+                    <select id="input_proyek_${uniqueKey}">
+                        ${optionsProyek}
+                    </select>
+                </div>
+
+                <button class="btn-simpan" onclick="simpanData('${sektor}', '${kelas}')">Simpan</button>
+            </div>
+        `;
+        container.innerHTML = html;
+    }
+        
+    function simpanData(sektor, kelas) {
+        const uniqueKey = getUniqueKey(sektor, kelas);
+        const optDiskusi = document.querySelector(`input[name="diskusi_${uniqueKey}"]:checked`);
+        const optTarbiyah = document.querySelector(`input[name="tarbiyah_${uniqueKey}"]:checked`);
+        const selProyek = document.getElementById(`input_proyek_${uniqueKey}`).value;
+
+        if (!optDiskusi) {
+            alert(`Pilih opsi Diskusi dan pendalaman materi untuk Kelas ${kelas}!`);
+            return;
+        }
+        if (!optTarbiyah) {
+            alert(`Pilih opsi Pelaksanaan tarbiyah dzatiyah untuk Kelas ${kelas}!`);
+            return;
+        }
+        if (!selProyek) {
+            alert(`Pilih prosentase Realisasi Proyek untuk Kelas ${kelas}!`);
+            return;
+        }
+
+        const payload = {
+            id_sektor: sektor,
+            id_kelas: kelas,
+            diskusi: optDiskusi.value,
+            tarbiyah: optTarbiyah.value,
+            proyek: selProyek
+        };
+    
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            alert(`Berhasil menyimpan data Evaluasi Kelas ${kelas} (Sektor ${sektor}). Data akan memperbarui data sebelumnya.`);
+            setTimeout(() => { muatDataSheet(); }, 1500);
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Gagal menyimpan data.");
+        });
+    }
+
+    function muatDataSheet() {
+        fetch(GVIZ_URL)
+            .then(res => res.text())
+            .then(text => {
+                const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const jsonData = JSON.parse(jsonString);
+
+                dataEvaluasiMap = {};
+
+                if (jsonData.table && jsonData.table.rows) {
+                    jsonData.table.rows.forEach(row => {
+                        const sektor = row.c[0] ? row.c[0].v : null;
+                        const kelas = row.c[1] ? row.c[1].v : null;
+                        const diskusi = row.c[2] ? row.c[2].v : null; 
+                        const tarbiyah = row.c[3] ? row.c[3].v : null;
+                        const proyek = row.c[4] ? (row.c[4].f || row.c[4].v) : null;
+
+                        if (sektor && kelas && kelas !== "TANGGAL_SEKTOR") {
+                            const uniqueKey = getUniqueKey(sektor, kelas);
+                            dataEvaluasiMap[uniqueKey] = {
+                                diskusi: diskusi,
+                                tarbiyah: tarbiyah,
+                                proyek: proyek
+                            };
+                        }
+                    });
+                }
+
+                renderRekap();
+                document.getElementById('loading-status').style.display = 'none';
+                document.getElementById('table-rekap-1').style.display = 'table';
+                document.getElementById('table-rekap-2').style.display = 'table';
+                document.getElementById('table-rekap-3').style.display = 'table';
+                
+                if (selectedSektor && selectedKelas) {
+                    renderFormKelas(selectedSektor, selectedKelas);
+                }
+            })
+            .catch(err => {
+                console.error("Gagal muat GVIZ:", err);
+                renderRekap();
+                document.getElementById('loading-status').style.display = 'none';
+                document.getElementById('table-rekap-1').style.display = 'table';
+                document.getElementById('table-rekap-2').style.display = 'table';
+                document.getElementById('table-rekap-3').style.display = 'table';
+            });
+    }
+
+    function renderRekap() {
+        const sektorSet = new Set(masterData.map(item => item.id_sektor));
+        let daftarSektor = Array.from(sektorSet).sort();
+        if (daftarSektor.includes("L5")) {
+            daftarSektor = daftarSektor.filter(s => s !== "L5");
+            daftarSektor.unshift("L5");
+        }
+
+        const tbody1 = document.getElementById('tbody-rekap-1');
+        const tbody2 = document.getElementById('tbody-rekap-2');
+        const tbody3 = document.getElementById('tbody-rekap-3');
+        tbody1.innerHTML = '';
+        tbody2.innerHTML = '';
+        tbody3.innerHTML = '';
+
+        let grandTotalKelas = 0;
+        let totalDiskusiSudah = 0, totalDiskusiBelum = 0, totalDiskusiBelumIsi = 0;
+        let totalTarbiyahSudah = 0, totalTarbiyahBelum = 0, totalTarbiyahBelumIsi = 0;
+        
+        let totalProyekBelumIsi = 0;
+        let grandTotalAkumulasiProyek = 0;
+
+        daftarSektor.forEach(sektor => {
+            const kelasSektor = masterData.filter(item => item.id_sektor === sektor);
+            const totalKelas = kelasSektor.length;
+
+            let diskusiSudah = 0, diskusiBelum = 0, diskusiBelumIsi = 0;
+            let tarbiyahSudah = 0, tarbiyahBelum = 0, tarbiyahBelumIsi = 0;
+            
+            let proyekBelumIsi = 0;
+            let akumulasiProyekSektor = 0;
+
+            kelasSektor.forEach(item => {
+                const uniqueKey = getUniqueKey(item.id_sektor, item.id_kelas);
+                const record = dataEvaluasiMap[uniqueKey];
+
+                // Diskusi
+                if (record && record.diskusi) {
+                    if (record.diskusi === 'Sudah') diskusiSudah++;
+                    else if (record.diskusi === 'Belum') diskusiBelum++;
+                    else diskusiBelumIsi++;
+                } else {
+                    diskusiBelumIsi++;
+                }
+
+                // Tarbiyah
+                if (record && record.tarbiyah) {
+                    if (record.tarbiyah === 'Sudah') tarbiyahSudah++;
+                    else if (record.tarbiyah === 'Belum') tarbiyahBelum++;
+                    else tarbiyahBelumIsi++;
+                } else {
+                    tarbiyahBelumIsi++;
+                }
+
+                // Proyek
+                if (record && record.proyek) {
+                    let valNum = parseFloat(record.proyek.replace('%', '')) || 0;
+                    akumulasiProyekSektor += valNum;
+                } else {
+                    proyekBelumIsi++;
+                }
+            });
+
+            grandTotalKelas += totalKelas;
+            totalDiskusiSudah += diskusiSudah;
+            totalDiskusiBelum += diskusiBelum;
+            totalDiskusiBelumIsi += diskusiBelumIsi;
+
+            totalTarbiyahSudah += tarbiyahSudah;
+            totalTarbiyahBelum += tarbiyahBelum;
+            totalTarbiyahBelumIsi += tarbiyahBelumIsi;
+
+            totalProyekBelumIsi += proyekBelumIsi;
+            grandTotalAkumulasiProyek += akumulasiProyekSektor;
+
+            // Rata-rata capaian proyek per sektor = total akumulasi persentase dibagi jumlah kelas di sektor tersebut
+            let rataRataProyekSektor = totalKelas > 0 ? (akumulasiProyekSektor / totalKelas).toFixed(1) : 0;
+
+            tbody1.innerHTML += `
+                <tr>
+                    <td><b>${sektor === "L5" ? "L5" : "Sektor " + sektor}</b></td>
+                    <td>${totalKelas}</td>
+                    <td>${diskusiSudah}</td>
+                    <td>${diskusiBelum}</td>
+                    <td>${diskusiBelumIsi}</td>
+                </tr>
+            `;
+
+            tbody2.innerHTML += `
+                <tr>
+                    <td><b>${sektor === "L5" ? "L5" : "Sektor " + sektor}</b></td>
+                    <td>${totalKelas}</td>
+                    <td>${tarbiyahSudah}</td>
+                    <td>${tarbiyahBelum}</td>
+                    <td>${tarbiyahBelumIsi}</td>
+                </tr>
+            `;
+
+            tbody3.innerHTML += `
+                <tr>
+                    <td><b>${sektor === "L5" ? "L5" : "Sektor " + sektor}</b></td>
+                    <td>${totalKelas}</td>
+                    <td>${proyekBelumIsi}</td>
+                    <td>${rataRataProyekSektor}%</td>
+                </tr>
+            `;
+        });
+
+        // Hitung rata-rata keseluruhan (total akumulasi seluruh kelas dibagi grand total kelas)
+        let overallRataRataProyek = grandTotalKelas > 0 ? (grandTotalAkumulasiProyek / grandTotalKelas).toFixed(1) : 0;
+
+        tbody1.innerHTML += `
+            <tr style="font-weight: bold; background-color: #f2f2f2;">
+                <td>Total Keseluruhan</td>
+                <td>${grandTotalKelas}</td>
+                <td>${totalDiskusiSudah}</td>
+                <td>${totalDiskusiBelum}</td>
+                <td>${totalDiskusiBelumIsi}</td>
+            </tr>
+        `;
+
+        tbody2.innerHTML += `
+            <tr style="font-weight: bold; background-color: #f2f2f2;">
+                <td>Total Keseluruhan</td>
+                <td>${grandTotalKelas}</td>
+                <td>${totalTarbiyahSudah}</td>
+                <td>${totalTarbiyahBelum}</td>
+                <td>${totalTarbiyahBelumIsi}</td>
+            </tr>
+        `;
+
+        tbody3.innerHTML += `
+            <tr style="font-weight: bold; background-color: #f2f2f2;">
+                <td>Total Keseluruhan</td>
+                <td>${grandTotalKelas}</td>
+                <td>${totalProyekBelumIsi}</td>
+                <td>${overallRataRataProyek}%</td>
+            </tr>
+        `;
+    }
+
+    window.onload = function() {
+        renderSektorList();
+        muatDataSheet();
+    };
+</script>
+
+</body>
+</html>
